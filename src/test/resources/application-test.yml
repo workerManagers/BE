@@ -17,7 +17,8 @@ spring:
 
 logging:
   level:
-    root: INFO
+    org.springframework.security: DEBUG
     com.example.workerManagers: DEBUG
+    root: INFO
     org.springframework.test: INFO
     org.springframework.web: INFO 

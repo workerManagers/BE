@@ -8,13 +8,21 @@ import com.example.workerManagers.domain.users.entity.User;
 import com.example.workerManagers.domain.users.exception.UserException;
 import com.example.workerManagers.domain.users.repository.UserRepository;
 import com.example.workerManagers.global.security.JwtTokenProvider;
+import com.example.workerManagers.global.security.TokenBlacklist;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +31,9 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
+    private final PasswordEncoder passwordEncoder;
+    private final TokenBlacklist tokenBlacklist;
+    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
 
     @Override
     @Transactional
@@ -33,9 +44,12 @@ public class UserServiceImpl implements UserService {
         }
 
         // 비밀번호 암호화
+        String encodedPassword = passwordEncoder.encode(requestDto.getPassword());
+
+        // 사용자 생성
         User user = User.builder()
                 .userName(requestDto.getUserName())
-                .password(requestDto.getPassword())
+                .password(encodedPassword)
                 .userSex(requestDto.getUserSex())
                 .userAge(requestDto.getUserAge())
                 .userEmail(requestDto.getUserEmail())
@@ -73,5 +87,33 @@ public class UserServiceImpl implements UserService {
                 .userId(user.getUserId())
                 .userName(user.getUserName())
                 .build();
+    }
+
+    @Override
+    public void logout(String token) {
+        logger.info("로그아웃 처리를 시작합니다.");
+        try {
+            if (token == null) {
+                logger.warn("로그아웃 시도: 토큰이 없습니다.");
+                throw new RuntimeException("인증 토큰이 필요합니다.");
+            }
+            
+            // 토큰이 유효한 경우에만 블랙리스트에 추가
+            if (tokenProvider.validateToken(token) && !tokenBlacklist.isBlacklisted(token)) {
+                tokenBlacklist.addToBlacklist(token);
+                logger.info("토큰이 블랙리스트에 추가되었습니다: {}", token);
+            } else {
+                logger.warn("로그아웃 시도: 토큰이 유효하지 않거나 이미 블랙리스트에 있습니다.");
+                throw new RuntimeException("유효하지 않은 토큰입니다.");
+            }
+        } catch (Exception e) {
+            logger.error("로그아웃 처리 중 오류 발생: {}", e.getMessage(), e);
+            // 예외를 다시 던져서 컨트롤러에서 처리하도록 함
+            throw e;
+        } finally {
+            // SecurityContext 초기화
+            SecurityContextHolder.clearContext();
+            logger.info("SecurityContext가 초기화되었습니다.");
+        }
     }
 } 

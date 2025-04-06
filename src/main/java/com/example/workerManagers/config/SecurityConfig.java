@@ -2,6 +2,7 @@ package com.example.workerManagers.config;
 
 import com.example.workerManagers.global.security.JwtAuthenticationFilter;
 import com.example.workerManagers.global.security.JwtTokenProvider;
+import com.example.workerManagers.global.security.TokenBlacklist;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
     
     private final JwtTokenProvider tokenProvider;
+    private final TokenBlacklist tokenBlacklist;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -28,10 +30,10 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/users/signup", "/users/login").permitAll()
+                .requestMatchers("/users/signup", "/users/login", "/users/logout", "/users/logout-test").permitAll()
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(new JwtAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
+            .addFilterBefore(new JwtAuthenticationFilter(tokenProvider, tokenBlacklist), UsernamePasswordAuthenticationFilter.class);
         
         return http.build();
     }

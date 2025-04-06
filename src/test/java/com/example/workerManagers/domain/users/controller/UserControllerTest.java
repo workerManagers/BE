@@ -1,5 +1,6 @@
 package com.example.workerManagers.domain.users.controller;
 
+import com.example.workerManagers.config.TestSecurityConfig;
 import com.example.workerManagers.domain.users.dto.LoginRequestDto;
 import com.example.workerManagers.domain.users.dto.LoginResponseDto;
 import com.example.workerManagers.domain.users.dto.SignupRequestDto;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -22,6 +24,8 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.doNothing;
+import static org.mockito.BDDMockito.doThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -29,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@Import(TestSecurityConfig.class)
 class UserControllerTest {
 
     private static final Logger logger = LoggerFactory.getLogger(UserControllerTest.class);
@@ -201,5 +206,61 @@ class UserControllerTest {
         
         // 테스트 성공 메시지 출력
         logger.info("로그인 실패 테스트 성공: 빈 비밀번호 검증 완료");
+    }
+
+    @Test
+    @DisplayName("로그아웃 성공 테스트")
+    void logoutSuccess() throws Exception {
+        // given
+        String testToken = "test-token";
+        doNothing().when(userService).logout(testToken);
+
+        // when & then
+        ResultActions resultActions = mockMvc.perform(post("/users/logout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + testToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("로그아웃이 완료되었습니다."))
+                .andExpect(jsonPath("$.success").value(true))
+                .andDo(MockMvcResultHandlers.print());
+        
+        // 테스트 성공 메시지 출력
+        logger.info("로그아웃 테스트 성공");
+    }
+
+    @Test
+    @DisplayName("로그아웃 실패 테스트 - 인증되지 않은 사용자")
+    void logoutFailWithUnauthorized() throws Exception {
+        // when & then
+        ResultActions resultActions = mockMvc.perform(post("/users/logout")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("인증 토큰이 필요합니다."))
+                .andExpect(jsonPath("$.success").value(false))
+                .andDo(MockMvcResultHandlers.print());
+        
+        // 테스트 성공 메시지 출력
+        logger.info("로그아웃 실패 테스트 성공: 인증되지 않은 사용자 검증 완료");
+    }
+
+    @Test
+    @DisplayName("로그아웃 실패 테스트 - 유효하지 않은 토큰")
+    void logoutFailWithInvalidToken() throws Exception {
+        // given
+        String invalidToken = "invalid-token";
+        doThrow(new RuntimeException("유효하지 않은 토큰입니다."))
+                .when(userService).logout(invalidToken);
+
+        // when & then
+        ResultActions resultActions = mockMvc.perform(post("/users/logout")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + invalidToken))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.error").value("유효하지 않은 토큰입니다."))
+                .andExpect(jsonPath("$.success").value(false))
+                .andDo(MockMvcResultHandlers.print());
+        
+        // 테스트 성공 메시지 출력
+        logger.info("로그아웃 실패 테스트 성공: 유효하지 않은 토큰 검증 완료");
     }
 } 

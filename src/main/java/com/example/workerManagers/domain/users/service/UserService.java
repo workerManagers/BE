@@ -8,4 +8,5 @@ import com.example.workerManagers.domain.users.dto.SignupResponseDto;
 public interface UserService {
     SignupResponseDto signup(SignupRequestDto requestDto);
     LoginResponseDto login(LoginRequestDto requestDto);
+    void logout(String token);
 } 

@@ -15,7 +15,7 @@ public class TestSecurityConfig {
         http
             .csrf().disable()
             .authorizeHttpRequests()
-                .requestMatchers("/api/users/signup", "/api/users/login").permitAll()
+                .requestMatchers("/users/signup", "/users/login", "/users/logout", "/users/logout-test").permitAll()
                 .anyRequest().authenticated();
         
         return http.build();
