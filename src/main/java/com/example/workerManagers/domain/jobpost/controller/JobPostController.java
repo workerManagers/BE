@@ -9,6 +9,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/job-posts")
 @RequiredArgsConstructor
@@ -40,5 +42,11 @@ public class JobPostController {
     public ResponseEntity<Void> deleteJobPost(@PathVariable Long jobPostId) {
         jobPostService.deleteJobPost(jobPostId);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping
+    public ResponseEntity<List<JobPostResponseDto>> getAllJobPosts() {
+        List<JobPostResponseDto> jobPosts = jobPostService.getAllJobPosts();
+        return ResponseEntity.ok(jobPosts);
     }
 } 

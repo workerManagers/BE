@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -119,8 +121,24 @@ public class JobPostServiceImpl implements JobPostService {
     @Transactional
     public void deleteJobPost(Long jobPostId) {
         JobPost jobPost = jobPostRepository.findById(jobPostId)
-                .orElseThrow(() -> new JobPostException("모집공고를 찾을 수 없습니다."));
-        
+                .orElseThrow(() -> new RuntimeException("모집공고를 찾을 수 없습니다."));
         jobPostRepository.delete(jobPost);
+    }
+
+    @Override
+    public List<JobPostResponseDto> getAllJobPosts() {
+        List<JobPost> jobPosts = jobPostRepository.findAll();
+        return jobPosts.stream()
+                .map(jobPost -> JobPostResponseDto.builder()
+                        .jobPostId(jobPost.getJobPostId())
+                        .industrialAccidentId(jobPost.getIndustrialAccident().getIndustrialAccidentId())
+                        .companyId(jobPost.getCompany().getCompanyId())
+                        .jobCodeId(jobPost.getJobCode().getJobCodeId())
+                        .jobPostDescription(jobPost.getJobPostDescription())
+                        .jobPeriod(jobPost.getJobPeriod())
+                        .deadline(jobPost.getDeadline())
+                        .message("모든 모집공고 조회가 완료되었습니다.")
+                        .build())
+                .collect(Collectors.toList());
     }
 } 
