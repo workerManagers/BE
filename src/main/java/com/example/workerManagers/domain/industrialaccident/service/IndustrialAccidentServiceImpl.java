@@ -18,6 +18,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,18 +36,12 @@ public class IndustrialAccidentServiceImpl implements IndustrialAccidentService 
         logger.info("산업재해 생성을 시작합니다.");
         try {
             // 회사 조회
-            Company company = companyRepository.findById(requestDto.getCompanyId())
-                    .orElseThrow(() -> {
-                        logger.warn("회사 조회 실패: ID={}", requestDto.getCompanyId());
-                        return new CompanyException("회사를 찾을 수 없습니다.");
-                    });
+            Company company = companyRepository.findByCompanyName(requestDto.getCompanyName())
+                    .orElseThrow(() -> new CompanyException("Company not found"));
 
             // 직종 코드 조회
-            JobCode jobCode = jobCodeRepository.findById(requestDto.getJobCodeId())
-                    .orElseThrow(() -> {
-                        logger.warn("직종 코드 조회 실패: ID={}", requestDto.getJobCodeId());
-                        return new JobCodeException("직종 코드를 찾을 수 없습니다.");
-                    });
+            JobCode jobCode = jobCodeRepository.findByJobName(requestDto.getJobName())
+                    .orElseThrow(() -> new JobCodeException("JobCode not found"));
 
             // 산업재해 엔티티 생성
             IndustrialAccident industrialAccident = IndustrialAccident.builder()
@@ -89,5 +85,47 @@ public class IndustrialAccidentServiceImpl implements IndustrialAccidentService 
             logger.error("산업재해 조회 중 오류 발생: {}", e.getMessage(), e);
             throw e;
         }
+    }
+
+    @Override
+    public List<IndustrialAccidentResponseDto> getAllIndustrialAccidents() {
+        List<IndustrialAccident> industrialAccidents = industrialAccidentRepository.findAll();
+        return industrialAccidents.stream()
+                .map(industrialAccident -> IndustrialAccidentResponseDto.builder()
+                        .industrialAccidentId(industrialAccident.getIndustrialAccidentId())
+                        .companyName(industrialAccident.getCompany().getCompanyName())
+                        .jobName(industrialAccident.getJobCode().getJobName())
+                        .industrialAccidentCode(industrialAccident.getIndustrialAccidentCode())
+                        .industrialAccidentName(industrialAccident.getIndustrialAccidentName())
+                        .industrialAccidentDate(industrialAccident.getIndustrialAccidentDate())
+                        .message("모든 산업재해 조회가 완료되었습니다.")
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public IndustrialAccidentResponseDto updateIndustrialAccident(Long industrialAccidentId, IndustrialAccidentRequestDto requestDto) {
+        IndustrialAccident industrialAccident = industrialAccidentRepository.findById(industrialAccidentId)
+                .orElseThrow(() -> new IndustrialAccidentException("산업재해를 찾을 수 없습니다."));
+
+        Company company = companyRepository.findByCompanyName(requestDto.getCompanyName())
+                .orElseThrow(() -> new CompanyException("Company not found"));
+        
+        JobCode jobCode = jobCodeRepository.findByJobName(requestDto.getJobName())
+                .orElseThrow(() -> new JobCodeException("JobCode not found"));
+
+        industrialAccident.update(company, jobCode, requestDto.getIndustrialAccidentCode(),
+                requestDto.getIndustrialAccidentName(), requestDto.getIndustrialAccidentDate());
+
+        return IndustrialAccidentResponseDto.builder()
+                .industrialAccidentId(industrialAccident.getIndustrialAccidentId())
+                .companyName(industrialAccident.getCompany().getCompanyName())
+                .jobName(industrialAccident.getJobCode().getJobName())
+                .industrialAccidentCode(industrialAccident.getIndustrialAccidentCode())
+                .industrialAccidentName(industrialAccident.getIndustrialAccidentName())
+                .industrialAccidentDate(industrialAccident.getIndustrialAccidentDate())
+                .message("산업재해가 성공적으로 수정되었습니다.")
+                .build();
     }
 } 

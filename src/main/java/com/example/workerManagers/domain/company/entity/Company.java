@@ -22,6 +22,10 @@ public class Company {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long companyId;
 
+    @Column(nullable = false, length = 100)
+    private String companyName;
+
+    @Column(nullable = false, length = 50)
     private String companyRegion;
 
     @Column(length = 20)
@@ -44,4 +48,10 @@ public class Company {
 
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
     private Set<Resume> resumes;
+
+    public void update(String companyName, String companyRegion, String companyCode) {
+        this.companyName = companyName;
+        this.companyRegion = companyRegion;
+        this.companyCode = companyCode;
+    }
 }

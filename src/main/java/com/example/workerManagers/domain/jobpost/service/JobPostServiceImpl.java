@@ -35,13 +35,13 @@ public class JobPostServiceImpl implements JobPostService {
     @Override
     @Transactional
     public JobPostResponseDto createJobPost(JobPostRequestDto requestDto) {
-        Company company = companyRepository.findById(requestDto.getCompanyId())
+        Company company = companyRepository.findByCompanyName(requestDto.getCompanyName())
                 .orElseThrow(() -> new CompanyException("Company not found"));
 
-        IndustrialAccident industrialAccident = industrialAccidentRepository.findById(requestDto.getIndustrialAccidentId())
+        IndustrialAccident industrialAccident = industrialAccidentRepository.findByIndustrialAccidentName(requestDto.getIndustrialAccidentName())
                 .orElseThrow(() -> new IndustrialAccidentException("IndustrialAccident not found"));
 
-        JobCode jobCode = jobCodeRepository.findById(requestDto.getJobCodeId())
+        JobCode jobCode = jobCodeRepository.findByJobName(requestDto.getJobName())
                 .orElseThrow(() -> new JobCodeException("JobCode not found"));
 
         JobPost jobPost = JobPost.builder()
@@ -60,9 +60,9 @@ public class JobPostServiceImpl implements JobPostService {
 
         return JobPostResponseDto.builder()
                 .jobPostId(savedJobPost.getJobPostId())
-                .companyId(savedJobPost.getCompany().getCompanyId())
-                .industrialAccidentId(savedJobPost.getIndustrialAccident().getIndustrialAccidentId())
-                .jobCodeId(savedJobPost.getJobCode().getJobCodeId())
+                .industrialAccidentName(savedJobPost.getIndustrialAccident().getIndustrialAccidentName())
+                .companyName(savedJobPost.getCompany().getCompanyName())
+                .jobName(savedJobPost.getJobCode().getJobName())
                 .jobPostDescription(savedJobPost.getJobPostDescription())
                 .jobPeriod(savedJobPost.getJobPeriod())
                 .deadline(savedJobPost.getDeadline())
@@ -75,16 +75,7 @@ public class JobPostServiceImpl implements JobPostService {
         JobPost jobPost = jobPostRepository.findById(jobPostId)
                 .orElseThrow(() -> new JobPostException("JobPost not found"));
 
-        return JobPostResponseDto.builder()
-                .jobPostId(jobPost.getJobPostId())
-                .companyId(jobPost.getCompany().getCompanyId())
-                .industrialAccidentId(jobPost.getIndustrialAccident().getIndustrialAccidentId())
-                .jobCodeId(jobPost.getJobCode().getJobCodeId())
-                .jobPostDescription(jobPost.getJobPostDescription())
-                .jobPeriod(jobPost.getJobPeriod())
-                .deadline(jobPost.getDeadline())
-                .message("모집공고 조회가 완료되었습니다.")
-                .build();
+        return JobPostResponseDto.of(jobPost, "모집공고 조회가 완료되었습니다.");
     }
 
     @Override
@@ -93,13 +84,13 @@ public class JobPostServiceImpl implements JobPostService {
         JobPost jobPost = jobPostRepository.findById(jobPostId)
                 .orElseThrow(() -> new JobPostException("모집공고를 찾을 수 없습니다."));
 
-        Company company = companyRepository.findById(requestDto.getCompanyId())
+        Company company = companyRepository.findByCompanyName(requestDto.getCompanyName())
                 .orElseThrow(() -> new CompanyException("Company not found"));
         
-        IndustrialAccident industrialAccident = industrialAccidentRepository.findById(requestDto.getIndustrialAccidentId())
+        IndustrialAccident industrialAccident = industrialAccidentRepository.findByIndustrialAccidentName(requestDto.getIndustrialAccidentName())
                 .orElseThrow(() -> new IndustrialAccidentException("IndustrialAccident not found"));
         
-        JobCode jobCode = jobCodeRepository.findById(requestDto.getJobCodeId())
+        JobCode jobCode = jobCodeRepository.findByJobName(requestDto.getJobName())
                 .orElseThrow(() -> new JobCodeException("JobCode not found"));
 
         jobPost.update(company, industrialAccident, jobCode, requestDto.getJobPostDescription(),
@@ -107,9 +98,9 @@ public class JobPostServiceImpl implements JobPostService {
 
         return JobPostResponseDto.builder()
                 .jobPostId(jobPost.getJobPostId())
-                .companyId(jobPost.getCompany().getCompanyId())
-                .industrialAccidentId(jobPost.getIndustrialAccident().getIndustrialAccidentId())
-                .jobCodeId(jobPost.getJobCode().getJobCodeId())
+                .industrialAccidentName(jobPost.getIndustrialAccident().getIndustrialAccidentName())
+                .companyName(jobPost.getCompany().getCompanyName())
+                .jobName(jobPost.getJobCode().getJobName())
                 .jobPostDescription(jobPost.getJobPostDescription())
                 .jobPeriod(jobPost.getJobPeriod())
                 .deadline(jobPost.getDeadline())
@@ -129,16 +120,7 @@ public class JobPostServiceImpl implements JobPostService {
     public List<JobPostResponseDto> getAllJobPosts() {
         List<JobPost> jobPosts = jobPostRepository.findAll();
         return jobPosts.stream()
-                .map(jobPost -> JobPostResponseDto.builder()
-                        .jobPostId(jobPost.getJobPostId())
-                        .industrialAccidentId(jobPost.getIndustrialAccident().getIndustrialAccidentId())
-                        .companyId(jobPost.getCompany().getCompanyId())
-                        .jobCodeId(jobPost.getJobCode().getJobCodeId())
-                        .jobPostDescription(jobPost.getJobPostDescription())
-                        .jobPeriod(jobPost.getJobPeriod())
-                        .deadline(jobPost.getDeadline())
-                        .message("모든 모집공고 조회가 완료되었습니다.")
-                        .build())
+                .map(jobPost -> JobPostResponseDto.of(jobPost, "모든 모집공고 조회가 완료되었습니다."))
                 .collect(Collectors.toList());
     }
 } 

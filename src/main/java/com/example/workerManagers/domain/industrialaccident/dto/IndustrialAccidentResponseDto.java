@@ -2,16 +2,18 @@ package com.example.workerManagers.domain.industrialaccident.dto;
 
 import com.example.workerManagers.domain.industrialaccident.entity.IndustrialAccident;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Builder
 public class IndustrialAccidentResponseDto {
     private Long industrialAccidentId;
-    private Long companyId;
-    private Long jobCodeId;
+    private String companyName;
+    private String jobName;
     private String industrialAccidentCode;
     private String industrialAccidentName;
     private LocalDateTime industrialAccidentDate;
@@ -20,8 +22,8 @@ public class IndustrialAccidentResponseDto {
     public static IndustrialAccidentResponseDto of(IndustrialAccident industrialAccident, String message) {
         return IndustrialAccidentResponseDto.builder()
                 .industrialAccidentId(industrialAccident.getIndustrialAccidentId())
-                .companyId(industrialAccident.getCompany().getCompanyId())
-                .jobCodeId(industrialAccident.getJobCode().getJobCodeId())
+                .companyName(industrialAccident.getCompany().getCompanyName())
+                .jobName(industrialAccident.getJobCode().getJobName())
                 .industrialAccidentCode(industrialAccident.getIndustrialAccidentCode())
                 .industrialAccidentName(industrialAccident.getIndustrialAccidentName())
                 .industrialAccidentDate(industrialAccident.getIndustrialAccidentDate())

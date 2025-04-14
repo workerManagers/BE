@@ -49,4 +49,13 @@ public class IndustrialAccident {
 
     @OneToMany(mappedBy = "industrialAccident", cascade = CascadeType.ALL)
     private Set<Resume> resumes;
+
+    public void update(Company company, JobCode jobCode, String industrialAccidentCode,
+                      String industrialAccidentName, LocalDateTime industrialAccidentDate) {
+        this.company = company;
+        this.jobCode = jobCode;
+        this.industrialAccidentCode = industrialAccidentCode;
+        this.industrialAccidentName = industrialAccidentName;
+        this.industrialAccidentDate = industrialAccidentDate;
+    }
 } 

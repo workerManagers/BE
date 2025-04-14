@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,5 +52,18 @@ public class JobCodeServiceImpl implements JobCodeService {
                 .jobName(jobCode.getJobName())
                 .message("직종 코드 조회가 완료되었습니다.")
                 .build();
+    }
+
+    @Override
+    public List<JobCodeResponseDto> getAllJobCodes() {
+        List<JobCode> jobCodes = jobCodeRepository.findAll();
+        return jobCodes.stream()
+                .map(jobCode -> JobCodeResponseDto.builder()
+                        .jobCodeId(jobCode.getJobCodeId())
+                        .jobCode(jobCode.getJobCode())
+                        .jobName(jobCode.getJobName())
+                        .message("직종 코드 조회가 완료되었습니다.")
+                        .build())
+                .collect(Collectors.toList());
     }
 } 
