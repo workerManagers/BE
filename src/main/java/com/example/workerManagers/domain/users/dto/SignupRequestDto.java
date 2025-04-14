@@ -23,6 +23,7 @@ public class SignupRequestDto {
     private Integer userAge;
 
     @Email(message = "올바른 이메일 형식이 아닙니다.")
-    @Size(max = 20, message = "이메일은 20자 이내로 입력해주세요.")
+
+    @Size(max = 50, message = "이메일은 50자 이내로 입력해주세요.")
     private String userEmail;
 } 
