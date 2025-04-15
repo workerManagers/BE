@@ -16,8 +16,7 @@ spring:
 
 # ================ JWT 설정 ================
 jwt:
-#  secret: ${JWT_SECRET}
-  secret: X2n1KNkvSqdEqfuayvRpsZ_QC3euPdmo8iszxLjs3vk=
+  secret: ${JWT_SECRET:jwtsecretkeyforworkermanagers2024abcd1234}
   token-validity-in-seconds: ${JWT_TOKEN_VALIDITY_IN_SECONDS:3600}
 
 # ================ 로깅 설정 ================
