@@ -1,5 +1,9 @@
 package com.example.workerManagers.global.exception;
 
+import com.example.workerManagers.domain.company.exception.CompanyException;
+import com.example.workerManagers.domain.industrialaccident.exception.IndustrialAccidentException;
+import com.example.workerManagers.domain.jobcode.exception.JobCodeException;
+import com.example.workerManagers.domain.jobpost.exception.JobPostException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,6 +28,34 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(com.example.workerManagers.domain.users.exception.UserException.class)
     public ResponseEntity<Map<String, String>> handleUserException(com.example.workerManagers.domain.users.exception.UserException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(CompanyException.class)
+    public ResponseEntity<Map<String, String>> handleCompanyException(CompanyException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(IndustrialAccidentException.class)
+    public ResponseEntity<Map<String, String>> handleIndustrialAccidentException(IndustrialAccidentException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(JobCodeException.class)
+    public ResponseEntity<Map<String, String>> handleJobCodeException(JobCodeException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(JobPostException.class)
+    public ResponseEntity<Map<String, String>> handleJobPostException(JobPostException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("error", ex.getMessage());
         return ResponseEntity.badRequest().body(error);
