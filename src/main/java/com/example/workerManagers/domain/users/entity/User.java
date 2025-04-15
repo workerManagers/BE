@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 @Entity
-@Table(name = "user") // 데이터베이스 테이블 이름
+@Table(name = "users") // 데이터베이스 테이블 이름
 @Getter
 @Setter
 @NoArgsConstructor
