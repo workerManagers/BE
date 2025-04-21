@@ -1,9 +1,8 @@
 package com.example.workerManagers.domain.aimatching.service;
 
-import com.example.workerManagers.domain.aimatching.dto.AIMatchingRequestDto;
-import com.example.workerManagers.domain.aimatching.dto.AIMatchingResponseDto;
+import com.example.workerManagers.domain.aimatching.dto.JobPostMatchingDto;
+import java.util.List;
 
 public interface AIMatchingService {
-    AIMatchingResponseDto createAIMatching(AIMatchingRequestDto requestDto);
-    AIMatchingResponseDto getAIMatching(Long matchingId);
+    List<JobPostMatchingDto> getMatchingScoresForAllJobPosts(String resumeText);
 } 

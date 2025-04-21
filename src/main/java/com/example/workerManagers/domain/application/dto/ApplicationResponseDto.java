@@ -1,23 +1,29 @@
 package com.example.workerManagers.domain.application.dto;
 
-import lombok.AllArgsConstructor;
+import com.example.workerManagers.domain.application.entity.Application;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class ApplicationResponseDto {
     private Long applicationId;
-    private String companyName;
-    private String jobName;
+    private String userName;
     private Long jobPostId;
-    private Long userId;
-    private Long aiMatchingId;
-    private String jobDescription;
-    private String jobPeriod;
-    private String applyResult;
-    private String message;
+    private String companyName;
+    private String status;
+    private LocalDateTime appliedAt;
+
+    public static ApplicationResponseDto from(Application application) {
+        return ApplicationResponseDto.builder()
+                .applicationId(application.getApplicationId())
+                .userName(application.getUser().getUserName())
+                .jobPostId(application.getJobPost().getJobPostId())
+                .companyName(application.getJobPost().getCompany().getCompanyName())
+                .status(application.getStatus().name())
+                .appliedAt(application.getAppliedAt())
+                .build();
+    }
 } 

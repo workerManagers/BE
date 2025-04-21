@@ -1,12 +1,10 @@
 package com.example.workerManagers.domain.jobcode.entity;
 
-import com.example.workerManagers.domain.aimatching.entity.AIMatching;
 import com.example.workerManagers.domain.application.entity.Application;
 import com.example.workerManagers.domain.company.entity.Company;
 import com.example.workerManagers.domain.industrialaccident.entity.IndustrialAccident;
 import com.example.workerManagers.domain.jobpost.entity.JobPost;
 import com.example.workerManagers.domain.restperiod.entity.RestPeriod;
-import com.example.workerManagers.domain.resume.entity.Resume;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.Set;
@@ -37,9 +35,6 @@ public class JobCode {
 
     @OneToMany(mappedBy = "jobCode", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Application> applications;
-
-    @OneToMany(mappedBy = "jobCode", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Resume> resumes;
 
     @OneToMany(mappedBy = "jobCode", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<JobPost> jobPosts;

@@ -1,9 +1,9 @@
 package com.example.workerManagers.domain.users.dto;
 
 import com.example.workerManagers.domain.users.entity.User.UserType;
+import jakarta.validation.constraints.*;
 import lombok.Getter;
 import lombok.Setter;
-import jakarta.validation.constraints.*;
 
 @Getter
 @Setter

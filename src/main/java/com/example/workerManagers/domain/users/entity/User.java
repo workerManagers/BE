@@ -1,27 +1,24 @@
 package com.example.workerManagers.domain.users.entity;
 
-import com.example.workerManagers.domain.aimatching.entity.AIMatching;
+import com.example.workerManagers.domain.application.entity.Application;
 import com.example.workerManagers.domain.company.entity.Company;
 import com.example.workerManagers.domain.resume.entity.Resume;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "users") // 데이터베이스 테이블 이름
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Table(name = "users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // 기본 키 자동 증가 설정
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long userId;
 
@@ -48,10 +45,10 @@ public class User {
     private Company company;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private Set<AIMatching> aiMatchings;
+    private Set<Application> applications = new HashSet<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private Set<Resume> resumes;
+    private Set<Resume> resumes = new HashSet<>();
 
     public enum UserType {
         INDIVIDUAL,  // 일반 회원

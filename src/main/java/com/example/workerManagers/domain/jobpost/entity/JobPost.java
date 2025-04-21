@@ -1,16 +1,14 @@
 package com.example.workerManagers.domain.jobpost.entity;
 
-import com.example.workerManagers.domain.aimatching.entity.AIMatching;
 import com.example.workerManagers.domain.application.entity.Application;
 import com.example.workerManagers.domain.company.entity.Company;
 import com.example.workerManagers.domain.jobcode.entity.JobCode;
-import com.example.workerManagers.domain.resume.entity.Resume;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -22,16 +20,25 @@ public class JobPost {
     @Column(name = "job_post_id")
     private Long jobPostId;
 
+    @Column(name = "job_name")
+    private String jobName;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
+    @JoinColumn(name = "company_id", nullable = false)
     private Company company;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "job_code")
+    @JoinColumn(name = "job_code_id", nullable = false)
     private JobCode jobCode;
 
-    @Column(name = "job_post_description", nullable = false, length = 500)
+    @Column(name = "job_post_description", nullable = false, length = 1000)
     private String jobPostDescription;
+
+    @Column(name = "job_period", nullable = false, length = 50)
+    private String jobPeriod;
+
+    @Column(name = "deadline", nullable = false)
+    private LocalDateTime deadline;
 
     @Column(name = "main_tasks", nullable = false, length = 1000)
     private String mainTasks;
@@ -42,58 +49,44 @@ public class JobPost {
     @Column(name = "preferred_qualifications", nullable = false, length = 1000)
     private String preferredQualifications;
 
-    @Column(name = "ideal_candidate", nullable = false, length = 500)
+    @Column(name = "ideal_candidate", nullable = false, length = 1000)
     private String idealCandidate;
-
-    @Column(name = "job_period", nullable = false, length = 50)
-    private String jobPeriod;
 
     @Column(name = "job_region", nullable = false, length = 50)
     private String jobRegion;
 
-    @Column(name = "deadline", nullable = false)
-    private LocalDateTime deadline;
-
     @OneToMany(mappedBy = "jobPost", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Application> applications;
-
-    @OneToMany(mappedBy = "jobPost", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<AIMatching> aiMatchings;
-
-    @OneToMany(mappedBy = "jobPost", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Resume> resumes;
+    private List<Application> applications = new ArrayList<>();
 
     @Builder
-    public JobPost(Company company, JobCode jobCode, String jobPostDescription, String mainTasks, 
-                  String qualifications, String preferredQualifications, String idealCandidate,
-                  String jobPeriod, String jobRegion, LocalDateTime deadline) {
+    public JobPost(String jobName, Company company, JobCode jobCode, String jobPostDescription, String jobPeriod,
+                  LocalDateTime deadline, String mainTasks, String qualifications,
+                  String preferredQualifications, String idealCandidate, String jobRegion) {
+        this.jobName = jobName;
         this.company = company;
         this.jobCode = jobCode;
         this.jobPostDescription = jobPostDescription;
+        this.jobPeriod = jobPeriod;
+        this.deadline = deadline;
         this.mainTasks = mainTasks;
         this.qualifications = qualifications;
         this.preferredQualifications = preferredQualifications;
         this.idealCandidate = idealCandidate;
-        this.jobPeriod = jobPeriod;
         this.jobRegion = jobRegion;
-        this.deadline = deadline;
-        this.applications = new HashSet<>();
-        this.aiMatchings = new HashSet<>();
-        this.resumes = new HashSet<>();
     }
 
-    public void update(Company company, JobCode jobCode, String jobPostDescription, String mainTasks,
-                      String qualifications, String preferredQualifications, String idealCandidate,
-                      String jobPeriod, String jobRegion, LocalDateTime deadline) {
+    public void update(Company company, JobCode jobCode, String jobPostDescription, String jobPeriod,
+                      LocalDateTime deadline, String mainTasks, String qualifications,
+                      String preferredQualifications, String idealCandidate, String jobRegion) {
         this.company = company;
         this.jobCode = jobCode;
         this.jobPostDescription = jobPostDescription;
+        this.jobPeriod = jobPeriod;
+        this.deadline = deadline;
         this.mainTasks = mainTasks;
         this.qualifications = qualifications;
         this.preferredQualifications = preferredQualifications;
         this.idealCandidate = idealCandidate;
-        this.jobPeriod = jobPeriod;
         this.jobRegion = jobRegion;
-        this.deadline = deadline;
     }
 }

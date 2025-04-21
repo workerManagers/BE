@@ -4,6 +4,7 @@ import com.example.workerManagers.domain.company.exception.CompanyException;
 import com.example.workerManagers.domain.industrialaccident.exception.IndustrialAccidentException;
 import com.example.workerManagers.domain.jobcode.exception.JobCodeException;
 import com.example.workerManagers.domain.jobpost.exception.JobPostException;
+import com.example.workerManagers.domain.resume.exception.ResumeException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -56,6 +57,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(JobPostException.class)
     public ResponseEntity<Map<String, String>> handleJobPostException(JobPostException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(ResumeException.class)
+    public ResponseEntity<Map<String, String>> handleResumeException(ResumeException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("error", ex.getMessage());
         return ResponseEntity.badRequest().body(error);
