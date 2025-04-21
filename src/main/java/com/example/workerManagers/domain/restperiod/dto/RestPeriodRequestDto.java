@@ -1,13 +1,16 @@
 // src/main/java/com/example/workerManagers/domain/restperiod/dto/RestPeriodRequestDto.java
 package com.example.workerManagers.domain.restperiod.dto;
 
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import jakarta.validation.constraints.NotNull;
 
 @Getter
-@Setter
+@Builder
 public class RestPeriodRequestDto {
+    @NotNull
+    private Long userId;
+    
     @NotNull
     private String disease;
     
@@ -26,7 +29,8 @@ public class RestPeriodRequestDto {
     @Override
     public String toString() {
         return "RestPeriodRequestDto{" +
-                "disease='" + disease + '\'' +
+                "userId=" + userId +
+                ", disease='" + disease + '\'' +
                 ", sex='" + sex + '\'' +
                 ", surgery='" + surgery + '\'' +
                 ", age='" + age + '\'' +
