@@ -14,16 +14,19 @@ spring:
         format_sql: true
 
 jwt:
-  secret: ${JWT_SECRET:jwtsecretkeyforworkermanagers2024abcd1234}
-  token-validity-in-seconds: ${JWT_TOKEN_VALIDITY_IN_SECONDS:3600}
+  secret: ${JWT_SECRET}
+  token-validity-in-seconds: ${JWT_TOKEN_VALIDITY_IN_SECONDS}
 
 logging:
   level:
     root: INFO
     com.example.workerManagers: DEBUG
+    com.example.workerManagers.domain.users: DEBUG
+    com.example.workerManagers.domain.users.controller: DEBUG
+    com.example.workerManagers.domain.users.service: DEBUG
     com.example.workerManagers.domain.restperiod: TRACE
     org.springframework.web: DEBUG
-    org.springframework.security: INFO
+    org.springframework.security: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
