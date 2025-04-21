@@ -62,6 +62,10 @@ public class UserServiceImpl implements UserService {
                 .userType(requestDto.getUserType())
                 .build();
 
+        // 사용자 저장을 먼저 수행
+        User savedUser = userRepository.save(user);
+        log.info("사용자 정보 저장 완료: {}", savedUser.getUserEmail());
+
         // 기업 회원인 경우 기업 정보 저장
         if (requestDto.getUserType() == User.UserType.COMPANY && requestDto.getCompanyInfo() != null) {
             SignupRequestDto.CompanyInfo companyInfo = requestDto.getCompanyInfo();
@@ -77,24 +81,24 @@ public class UserServiceImpl implements UserService {
                     .aiMatchings(new HashSet<>())
                     .applications(new HashSet<>())
                     .resumes(new HashSet<>())
+                    .user(savedUser)  // 저장된 User 엔티티 설정
                     .build();
             
             // 기업 정보 저장
             Company savedCompany = companyRepository.save(company);
             log.info("기업 정보 저장 완료: {}", savedCompany.getCompanyName());
             
-            // 사용자와 기업 연결
-            user.setCompany(savedCompany);
+            // 저장된 Company 엔티티로 User 업데이트
+            savedUser.setCompany(savedCompany);
+            userRepository.save(savedUser);
         }
-
-        // 사용자 저장
-        User savedUser = userRepository.save(user);
-        log.info("회원가입 성공: {}", savedUser.getUserEmail());
 
         return SignupResponseDto.builder()
                 .userId(savedUser.getUserId())
                 .userName(savedUser.getUserName())
                 .userEmail(savedUser.getUserEmail())
+                .userType(savedUser.getUserType())
+                .message("회원가입이 성공적으로 완료되었습니다.")
                 .build();
     }
 

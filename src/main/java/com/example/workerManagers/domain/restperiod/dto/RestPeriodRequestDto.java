@@ -4,33 +4,30 @@ package com.example.workerManagers.domain.restperiod.dto;
 import lombok.Builder;
 import lombok.Getter;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 @Getter
 @Builder
 public class RestPeriodRequestDto {
-    @NotNull
-    private Long userId;
-    
-    @NotNull
+    @NotNull(message = "질병명은 필수입니다.")
     private String disease;
     
-    @NotNull
+    @NotNull(message = "성별은 필수입니다.")
     private String sex;
     
-    @NotNull
+    @NotNull(message = "수술 여부는 필수입니다.")
     private String surgery;
     
-    @NotNull
+    @NotNull(message = "연령대는 필수입니다.")
     private String age;
     
-    @NotNull
+    @NotNull(message = "지역은 필수입니다.")
     private String region;
     
     @Override
     public String toString() {
         return "RestPeriodRequestDto{" +
-                "userId=" + userId +
-                ", disease='" + disease + '\'' +
+                "disease='" + disease + '\'' +
                 ", sex='" + sex + '\'' +
                 ", surgery='" + surgery + '\'' +
                 ", age='" + age + '\'' +

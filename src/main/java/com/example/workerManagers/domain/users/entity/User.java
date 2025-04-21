@@ -44,8 +44,7 @@ public class User {
     @Column(name = "user_type", nullable = false)
     private UserType userType;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id")
+    @OneToOne(mappedBy = "user")
     private Company company;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

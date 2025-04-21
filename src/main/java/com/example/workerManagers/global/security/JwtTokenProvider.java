@@ -90,4 +90,22 @@ public class JwtTokenProvider {
             return false;
         }
     }
+    
+    public String getUserEmailFromToken(String token) {
+        logger.info("토큰에서 사용자 이메일 추출 시작");
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            
+            String email = claims.getSubject();
+            logger.info("토큰에서 사용자 이메일 추출 완료: {}", email);
+            return email;
+        } catch (Exception e) {
+            logger.error("토큰에서 사용자 이메일 추출 실패: {}", e.getMessage());
+            throw new RuntimeException("토큰에서 사용자 이메일을 추출할 수 없습니다.", e);
+        }
+    }
 }

@@ -6,6 +6,7 @@ import com.example.workerManagers.domain.industrialaccident.entity.IndustrialAcc
 import com.example.workerManagers.domain.jobpost.entity.JobPost;
 import com.example.workerManagers.domain.restperiod.entity.RestPeriod;
 import com.example.workerManagers.domain.resume.entity.Resume;
+import com.example.workerManagers.domain.users.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -48,6 +49,10 @@ public class Company {
 
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL)
     private Set<Resume> resumes;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     public void update(String companyName, String companyRegion, String companyCode) {
         this.companyName = companyName;
