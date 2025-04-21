@@ -102,19 +102,26 @@ public class UserServiceImpl implements UserService {
     public LoginResponseDto login(LoginRequestDto requestDto) {
         log.info("로그인 시도: {}", requestDto.getUserEmail());
         try {
+            // 사용자 존재 여부 확인
+            User user = userRepository.findByUserEmail(requestDto.getUserEmail())
+                    .orElseThrow(() -> {
+                        log.error("존재하지 않는 사용자: {}", requestDto.getUserEmail());
+                        return new UserException("이메일 또는 비밀번호가 일치하지 않습니다.");
+                    });
+
             // 인증 처리
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(requestDto.getUserEmail(), requestDto.getPassword())
-            );
-            
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            try {
+                Authentication authentication = authenticationManager.authenticate(
+                        new UsernamePasswordAuthenticationToken(requestDto.getUserEmail(), requestDto.getPassword())
+                );
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } catch (Exception e) {
+                log.error("인증 실패: {} - {}", requestDto.getUserEmail(), e.getMessage());
+                throw new UserException("이메일 또는 비밀번호가 일치하지 않습니다.");
+            }
             
             // JWT 토큰 생성
             String token = tokenProvider.createToken(requestDto.getUserEmail());
-            
-            // 사용자 정보 조회
-            User user = userRepository.findByUserEmail(requestDto.getUserEmail())
-                    .orElseThrow(() -> new UserException("사용자를 찾을 수 없습니다."));
             
             log.info("로그인 성공: {}", requestDto.getUserEmail());
             
@@ -124,9 +131,11 @@ public class UserServiceImpl implements UserService {
                     .userId(user.getUserId())
                     .userName(user.getUserName())
                     .build();
-        } catch (Exception e) {
-            log.error("로그인 실패: {} - {}", requestDto.getUserEmail(), e.getMessage());
+        } catch (UserException e) {
             throw e;
+        } catch (Exception e) {
+            log.error("로그인 처리 중 오류 발생: {} - {}", requestDto.getUserEmail(), e.getMessage());
+            throw new UserException("로그인 처리 중 오류가 발생했습니다.");
         }
     }
 
