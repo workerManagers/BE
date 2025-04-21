@@ -2,7 +2,6 @@ package com.example.workerManagers.domain.resume.entity;
 
 import com.example.workerManagers.domain.aimatching.entity.AIMatching;
 import com.example.workerManagers.domain.company.entity.Company;
-import com.example.workerManagers.domain.industrialaccident.entity.IndustrialAccident;
 import com.example.workerManagers.domain.jobcode.entity.JobCode;
 import com.example.workerManagers.domain.jobpost.entity.JobPost;
 import com.example.workerManagers.domain.users.entity.User;
@@ -11,10 +10,8 @@ import lombok.*;
 
 @Entity
 @Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "resume")
 public class Resume {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +19,7 @@ public class Resume {
     private Long resumeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -30,19 +27,15 @@ public class Resume {
     private AIMatching aiMatching;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "jobPost_id", nullable = false)
+    @JoinColumn(name = "job_post_id")
     private JobPost jobPost;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "industrialAccident_id", nullable = false)
-    private IndustrialAccident industrialAccident;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id", nullable = false)
+    @JoinColumn(name = "company_id")
     private Company company;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "job_code", nullable = false)
+    @JoinColumn(name = "job_code")
     private JobCode jobCode;
 
     @Column(name = "resume_area", length = 20)
@@ -50,4 +43,27 @@ public class Resume {
 
     @Column(name = "resume_history", length = 100)
     private String resumeHistory;
+
+    @Builder
+    public Resume(User user, AIMatching aiMatching, JobPost jobPost, Company company, 
+                 JobCode jobCode, String resumeArea, String resumeHistory) {
+        this.user = user;
+        this.aiMatching = aiMatching;
+        this.jobPost = jobPost;
+        this.company = company;
+        this.jobCode = jobCode;
+        this.resumeArea = resumeArea;
+        this.resumeHistory = resumeHistory;
+    }
+
+    public void update(User user, AIMatching aiMatching, JobPost jobPost, Company company,
+                      JobCode jobCode, String resumeArea, String resumeHistory) {
+        this.user = user;
+        this.aiMatching = aiMatching;
+        this.jobPost = jobPost;
+        this.company = company;
+        this.jobCode = jobCode;
+        this.resumeArea = resumeArea;
+        this.resumeHistory = resumeHistory;
+    }
 }

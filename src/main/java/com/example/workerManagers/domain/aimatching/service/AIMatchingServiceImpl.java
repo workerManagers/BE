@@ -36,7 +36,6 @@ public class AIMatchingServiceImpl implements AIMatchingService {
 
     private final AIMatchingRepository aiMatchingRepository;
     private final CompanyRepository companyRepository;
-    private final IndustrialAccidentRepository industrialAccidentRepository;
     private final JobCodeRepository jobCodeRepository;
     private final JobPostRepository jobPostRepository;
     private final UserRepository userRepository;
@@ -44,13 +43,10 @@ public class AIMatchingServiceImpl implements AIMatchingService {
     @Override
     @Transactional
     public AIMatchingResponseDto createAIMatching(AIMatchingRequestDto requestDto) {
-        Company company = companyRepository.findById(requestDto.getCompanyId())
+        Company company = companyRepository.findByCompanyName(requestDto.getCompanyName())
                 .orElseThrow(() -> new CompanyException("Company not found"));
 
-        IndustrialAccident industrialAccident = industrialAccidentRepository.findById(requestDto.getIndustrialAccidentId())
-                .orElseThrow(() -> new IndustrialAccidentException("IndustrialAccident not found"));
-
-        JobCode jobCode = jobCodeRepository.findById(requestDto.getJobCodeId())
+        JobCode jobCode = jobCodeRepository.findByJobName(requestDto.getJobName())
                 .orElseThrow(() -> new JobCodeException("JobCode not found"));
 
         JobPost jobPost = jobPostRepository.findById(requestDto.getJobPostId())
@@ -61,22 +57,18 @@ public class AIMatchingServiceImpl implements AIMatchingService {
 
         AIMatching aiMatching = AIMatching.builder()
                 .company(company)
-                .industrialAccident(industrialAccident)
                 .jobCode(jobCode)
                 .jobPost(jobPost)
                 .user(user)
                 .matchingScore(requestDto.getMatchingScore())
-                .applications(new HashSet<>())
-                .resumes(new HashSet<>())
                 .build();
 
         AIMatching savedAIMatching = aiMatchingRepository.save(aiMatching);
 
         return AIMatchingResponseDto.builder()
                 .matchingId(savedAIMatching.getMatchingId())
-                .companyId(savedAIMatching.getCompany().getCompanyId())
-                .industrialAccidentId(savedAIMatching.getIndustrialAccident().getIndustrialAccidentId())
-                .jobCodeId(savedAIMatching.getJobCode().getJobCodeId())
+                .companyName(savedAIMatching.getCompany().getCompanyName())
+                .jobName(savedAIMatching.getJobCode().getJobName())
                 .jobPostId(savedAIMatching.getJobPost().getJobPostId())
                 .userId(savedAIMatching.getUser().getUserId())
                 .matchingScore(savedAIMatching.getMatchingScore())
@@ -91,9 +83,8 @@ public class AIMatchingServiceImpl implements AIMatchingService {
 
         return AIMatchingResponseDto.builder()
                 .matchingId(aiMatching.getMatchingId())
-                .companyId(aiMatching.getCompany().getCompanyId())
-                .industrialAccidentId(aiMatching.getIndustrialAccident().getIndustrialAccidentId())
-                .jobCodeId(aiMatching.getJobCode().getJobCodeId())
+                .companyName(aiMatching.getCompany().getCompanyName())
+                .jobName(aiMatching.getJobCode().getJobName())
                 .jobPostId(aiMatching.getJobPost().getJobPostId())
                 .userId(aiMatching.getUser().getUserId())
                 .matchingScore(aiMatching.getMatchingScore())

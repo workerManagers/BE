@@ -2,8 +2,6 @@ package com.example.workerManagers.domain.jobpost.service;
 
 import com.example.workerManagers.domain.company.entity.Company;
 import com.example.workerManagers.domain.company.repository.CompanyRepository;
-import com.example.workerManagers.domain.industrialaccident.entity.IndustrialAccident;
-import com.example.workerManagers.domain.industrialaccident.repository.IndustrialAccidentRepository;
 import com.example.workerManagers.domain.jobcode.entity.JobCode;
 import com.example.workerManagers.domain.jobcode.repository.JobCodeRepository;
 import com.example.workerManagers.domain.jobpost.dto.JobPostRequestDto;
@@ -12,7 +10,6 @@ import com.example.workerManagers.domain.jobpost.entity.JobPost;
 import com.example.workerManagers.domain.jobpost.exception.JobPostException;
 import com.example.workerManagers.domain.jobpost.repository.JobPostRepository;
 import com.example.workerManagers.domain.company.exception.CompanyException;
-import com.example.workerManagers.domain.industrialaccident.exception.IndustrialAccidentException;
 import com.example.workerManagers.domain.jobcode.exception.JobCodeException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,44 +26,45 @@ public class JobPostServiceImpl implements JobPostService {
 
     private final JobPostRepository jobPostRepository;
     private final CompanyRepository companyRepository;
-    private final IndustrialAccidentRepository industrialAccidentRepository;
     private final JobCodeRepository jobCodeRepository;
 
     @Override
     @Transactional
     public JobPostResponseDto createJobPost(JobPostRequestDto requestDto) {
         Company company = companyRepository.findByCompanyName(requestDto.getCompanyName())
-                .orElseThrow(() -> new CompanyException("Company not found"));
-
-        IndustrialAccident industrialAccident = industrialAccidentRepository.findByIndustrialAccidentName(requestDto.getIndustrialAccidentName())
-                .orElseThrow(() -> new IndustrialAccidentException("IndustrialAccident not found"));
+                .orElseThrow(() -> new CompanyException("회사를 찾을 수 없습니다: " + requestDto.getCompanyName()));
 
         JobCode jobCode = jobCodeRepository.findByJobName(requestDto.getJobName())
-                .orElseThrow(() -> new JobCodeException("JobCode not found"));
+                .orElseThrow(() -> new JobCodeException("직종 코드를 찾을 수 없습니다: " + requestDto.getJobName()));
 
         JobPost jobPost = JobPost.builder()
                 .company(company)
-                .industrialAccident(industrialAccident)
                 .jobCode(jobCode)
                 .jobPostDescription(requestDto.getJobPostDescription())
+                .mainTasks(requestDto.getMainTasks())
+                .qualifications(requestDto.getQualifications())
+                .preferredQualifications(requestDto.getPreferredQualifications())
+                .idealCandidate(requestDto.getIdealCandidate())
                 .jobPeriod(requestDto.getJobPeriod())
+                .jobRegion(requestDto.getJobRegion())
                 .deadline(requestDto.getDeadline())
-                .applications(new HashSet<>())
-                .aiMatchings(new HashSet<>())
-                .resumes(new HashSet<>())
                 .build();
 
         JobPost savedJobPost = jobPostRepository.save(jobPost);
 
         return JobPostResponseDto.builder()
                 .jobPostId(savedJobPost.getJobPostId())
-                .industrialAccidentName(savedJobPost.getIndustrialAccident().getIndustrialAccidentName())
                 .companyName(savedJobPost.getCompany().getCompanyName())
                 .jobName(savedJobPost.getJobCode().getJobName())
                 .jobPostDescription(savedJobPost.getJobPostDescription())
+                .mainTasks(savedJobPost.getMainTasks())
+                .qualifications(savedJobPost.getQualifications())
+                .preferredQualifications(savedJobPost.getPreferredQualifications())
+                .idealCandidate(savedJobPost.getIdealCandidate())
                 .jobPeriod(savedJobPost.getJobPeriod())
+                .jobRegion(savedJobPost.getJobRegion())
                 .deadline(savedJobPost.getDeadline())
-                .message("모집공고가 성공적으로 생성되었습니다.")
+                .message("채용 공고가 성공적으로 생성되었습니다.")
                 .build();
     }
 
@@ -82,29 +80,32 @@ public class JobPostServiceImpl implements JobPostService {
     @Transactional
     public JobPostResponseDto updateJobPost(Long jobPostId, JobPostRequestDto requestDto) {
         JobPost jobPost = jobPostRepository.findById(jobPostId)
-                .orElseThrow(() -> new JobPostException("모집공고를 찾을 수 없습니다."));
+                .orElseThrow(() -> new JobPostException("채용 공고를 찾을 수 없습니다: " + jobPostId));
 
         Company company = companyRepository.findByCompanyName(requestDto.getCompanyName())
-                .orElseThrow(() -> new CompanyException("Company not found"));
-        
-        IndustrialAccident industrialAccident = industrialAccidentRepository.findByIndustrialAccidentName(requestDto.getIndustrialAccidentName())
-                .orElseThrow(() -> new IndustrialAccidentException("IndustrialAccident not found"));
+                .orElseThrow(() -> new CompanyException("회사를 찾을 수 없습니다: " + requestDto.getCompanyName()));
         
         JobCode jobCode = jobCodeRepository.findByJobName(requestDto.getJobName())
-                .orElseThrow(() -> new JobCodeException("JobCode not found"));
+                .orElseThrow(() -> new JobCodeException("직종 코드를 찾을 수 없습니다: " + requestDto.getJobName()));
 
-        jobPost.update(company, industrialAccident, jobCode, requestDto.getJobPostDescription(),
-                requestDto.getJobPeriod(), requestDto.getDeadline());
+        jobPost.update(company, jobCode, requestDto.getJobPostDescription(),
+                requestDto.getMainTasks(), requestDto.getQualifications(),
+                requestDto.getPreferredQualifications(), requestDto.getIdealCandidate(),
+                requestDto.getJobPeriod(), requestDto.getJobRegion(), requestDto.getDeadline());
 
         return JobPostResponseDto.builder()
                 .jobPostId(jobPost.getJobPostId())
-                .industrialAccidentName(jobPost.getIndustrialAccident().getIndustrialAccidentName())
                 .companyName(jobPost.getCompany().getCompanyName())
                 .jobName(jobPost.getJobCode().getJobName())
                 .jobPostDescription(jobPost.getJobPostDescription())
+                .mainTasks(jobPost.getMainTasks())
+                .qualifications(jobPost.getQualifications())
+                .preferredQualifications(jobPost.getPreferredQualifications())
+                .idealCandidate(jobPost.getIdealCandidate())
                 .jobPeriod(jobPost.getJobPeriod())
+                .jobRegion(jobPost.getJobRegion())
                 .deadline(jobPost.getDeadline())
-                .message("모집공고가 성공적으로 수정되었습니다.")
+                .message("채용 공고가 성공적으로 수정되었습니다.")
                 .build();
     }
 
@@ -122,5 +123,33 @@ public class JobPostServiceImpl implements JobPostService {
         return jobPosts.stream()
                 .map(jobPost -> JobPostResponseDto.of(jobPost, "모든 모집공고 조회가 완료되었습니다."))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public String convertToFastApiFormat(JobPostResponseDto jobPost) {
+        StringBuilder description = new StringBuilder();
+        
+        // 공고 설명
+        description.append(jobPost.getJobPostDescription()).append(". ");
+        
+        // 주요 업무
+        description.append("주요 업무: ").append(jobPost.getMainTasks()).append(". ");
+        
+        // 자격 요건
+        description.append("자격 요건: ").append(jobPost.getQualifications()).append(". ");
+        
+        // 우대 사항
+        description.append("우대 사항: ").append(jobPost.getPreferredQualifications()).append(". ");
+        
+        // 인재상
+        description.append("인재상: ").append(jobPost.getIdealCandidate()).append(". ");
+        
+        // 근무 기간
+        description.append("근무 기간: ").append(jobPost.getJobPeriod()).append(". ");
+        
+        // 근무 지역
+        description.append("근무 지역: ").append(jobPost.getJobRegion()).append(".");
+        
+        return description.toString();
     }
 } 
