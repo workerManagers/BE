@@ -19,8 +19,16 @@ jwt:
 
 logging:
   level:
-    root: DEBUG
+    root: INFO
     com.example.workerManagers: DEBUG
+    com.example.workerManagers.domain.restperiod: TRACE
+    org.springframework.web: DEBUG
     org.springframework.security: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
   file:
     name: logs/application-dev.log
+
+fastapi:
+  url: https://port-0-workermanagers-ai-m9i2iiuc1e546d59.sel4.cloudtype.app  # FastAPI 서버 주소
