@@ -1,6 +1,8 @@
 spring:
   config:
-    import: optional:file:.env[.properties]
+    import: 
+      - optional:file:.env[.properties]
+      - optional:file:application-${spring.profiles.active}.yml
   profiles:
     active: dev
 

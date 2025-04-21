@@ -1,26 +1,27 @@
 // src/main/java/com/example/workerManagers/domain/restperiod/dto/RestPeriodRequestDto.java
 package com.example.workerManagers.domain.restperiod.dto;
 
+import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 @Getter
-@Setter
+@Builder
 public class RestPeriodRequestDto {
-    @NotNull
+    @NotNull(message = "질병명은 필수입니다.")
     private String disease;
     
-    @NotNull
+    @NotNull(message = "성별은 필수입니다.")
     private String sex;
     
-    @NotNull
+    @NotNull(message = "수술 여부는 필수입니다.")
     private String surgery;
     
-    @NotNull
+    @NotNull(message = "연령대는 필수입니다.")
     private String age;
     
-    @NotNull
+    @NotNull(message = "지역은 필수입니다.")
     private String region;
     
     @Override

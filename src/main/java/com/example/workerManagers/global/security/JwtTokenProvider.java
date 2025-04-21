@@ -1,5 +1,6 @@
 package com.example.workerManagers.global.security;
 
+import com.example.workerManagers.domain.users.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.slf4j.Logger;
@@ -37,13 +38,14 @@ public class JwtTokenProvider {
         this.tokenBlacklist = tokenBlacklist;
     }
 
-    public String createToken(String email) {
-        logger.info("토큰 생성 시작: {}", email);
+    public String createToken(String email, User.UserType userType) {
+        logger.info("토큰 생성 시작: {}, userType: {}", email, userType);
         Date now = new Date();
         Date validity = new Date(now.getTime() + tokenValidityInMilliseconds);
 
         String token = Jwts.builder()
                 .setSubject(email)
+                .claim("userType", userType.name())
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .signWith(key)
@@ -88,6 +90,43 @@ public class JwtTokenProvider {
         } catch (JwtException | IllegalArgumentException e) {
             logger.error("유효하지 않은 토큰: {}", e.getMessage());
             return false;
+        }
+    }
+    
+    public String getUserEmailFromToken(String token) {
+        logger.info("토큰에서 사용자 이메일 추출 시작");
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            
+            String email = claims.getSubject();
+            logger.info("토큰에서 사용자 이메일 추출 완료: {}", email);
+            return email;
+        } catch (Exception e) {
+            logger.error("토큰에서 사용자 이메일 추출 실패: {}", e.getMessage());
+            throw new RuntimeException("토큰에서 사용자 이메일을 추출할 수 없습니다.", e);
+        }
+    }
+
+    public User.UserType getUserTypeFromToken(String token) {
+        logger.info("토큰에서 사용자 타입 추출 시작");
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            
+            String userTypeStr = claims.get("userType", String.class);
+            User.UserType userType = User.UserType.valueOf(userTypeStr);
+            logger.info("토큰에서 사용자 타입 추출 완료: {}", userType);
+            return userType;
+        } catch (Exception e) {
+            logger.error("토큰에서 사용자 타입 추출 실패: {}", e.getMessage());
+            throw new RuntimeException("토큰에서 사용자 타입을 추출할 수 없습니다.", e);
         }
     }
 }
