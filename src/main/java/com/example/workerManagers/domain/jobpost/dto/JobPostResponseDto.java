@@ -17,6 +17,10 @@ public class JobPostResponseDto {
     private String companyName;
     private String jobName;
     private String jobPostDescription;
+    private String mainTasks;
+    private String qualifications;
+    private String preferredQualifications;
+    private String idealCandidate;
     private String jobPeriod;
     private String jobRegion;
     private LocalDateTime deadline;
@@ -28,6 +32,10 @@ public class JobPostResponseDto {
                 .companyName(jobPost.getCompany().getCompanyName())
                 .jobName(jobPost.getJobCode().getJobName())
                 .jobPostDescription(jobPost.getJobPostDescription())
+                .mainTasks(jobPost.getMainTasks())
+                .qualifications(jobPost.getQualifications())
+                .preferredQualifications(jobPost.getPreferredQualifications())
+                .idealCandidate(jobPost.getIdealCandidate())
                 .jobPeriod(jobPost.getJobPeriod())
                 .jobRegion(jobPost.getJobRegion())
                 .deadline(jobPost.getDeadline())

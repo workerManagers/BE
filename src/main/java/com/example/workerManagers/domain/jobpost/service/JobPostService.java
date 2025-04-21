@@ -10,4 +10,5 @@ public interface JobPostService {
     JobPostResponseDto updateJobPost(Long jobPostId, JobPostRequestDto requestDto);
     void deleteJobPost(Long jobPostId);
     List<JobPostResponseDto> getAllJobPosts();
+    String convertToFastApiFormat(JobPostResponseDto jobPost);
 } 
