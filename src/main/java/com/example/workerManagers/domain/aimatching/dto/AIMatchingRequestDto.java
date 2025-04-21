@@ -14,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AIMatchingRequestDto {
-    private String input_text;
+    private Long resumeId;
     private List<JobPostData> dataset;
 
     @Getter
