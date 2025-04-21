@@ -1,5 +1,6 @@
 package com.example.workerManagers.domain.users.dto;
 
+import com.example.workerManagers.domain.users.entity.User;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -10,4 +11,5 @@ public class LoginResponseDto {
     private String tokenType;
     private Long userId;
     private String userName;
+    private User.UserType userType;
 } 

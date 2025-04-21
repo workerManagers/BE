@@ -125,7 +125,7 @@ public class UserServiceImpl implements UserService {
             }
             
             // JWT 토큰 생성
-            String token = tokenProvider.createToken(requestDto.getUserEmail());
+            String token = tokenProvider.createToken(requestDto.getUserEmail(), user.getUserType());
             
             log.info("로그인 성공: {}", requestDto.getUserEmail());
             
@@ -134,6 +134,7 @@ public class UserServiceImpl implements UserService {
                     .tokenType("Bearer")
                     .userId(user.getUserId())
                     .userName(user.getUserName())
+                    .userType(user.getUserType())
                     .build();
         } catch (UserException e) {
             throw e;
