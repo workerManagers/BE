@@ -4,6 +4,7 @@ import com.example.workerManagers.domain.restperiod.dto.RestPeriodRequestDto;
 import com.example.workerManagers.domain.restperiod.dto.RestPeriodResponseDto;
 import com.example.workerManagers.domain.restperiod.entity.RestPeriod;
 import com.example.workerManagers.domain.restperiod.repository.RestPeriodRepository;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -52,7 +53,7 @@ public class RestPeriodServiceImpl implements RestPeriodService {
                     .surgery(requestDto.getSurgery())
                     .age(requestDto.getAge())
                     .region(requestDto.getRegion())
-                    .predictedPeriod(response.getPredictedPeriod())
+                    .predictedPeriod(Math.round(response.getPredictedValue()))
                     .predictionDate(LocalDate.now())
                     .build();
 
@@ -60,7 +61,8 @@ public class RestPeriodServiceImpl implements RestPeriodService {
             log.info("예측 결과가 데이터베이스에 저장되었습니다: {}", restPeriod);
 
             return RestPeriodResponseDto.builder()
-                    .predictedPeriod(response.getPredictedPeriod())
+                    .predictedValue(Math.round(response.getPredictedValue()))
+                    .message(String.format("예상 요양기간은 %d일입니다.", Math.round(response.getPredictedValue())))
                     .build();
 
         } catch (Exception e) {
@@ -70,20 +72,21 @@ public class RestPeriodServiceImpl implements RestPeriodService {
     }
 
     private static class PredictionResponse {
-        private int predictedPeriod;
+        @JsonProperty("predicted_value")
+        private float predictedValue;
 
-        public int getPredictedPeriod() {
-            return predictedPeriod;
+        public float getPredictedValue() {
+            return predictedValue;
         }
 
-        public void setPredictedPeriod(int predictedPeriod) {
-            this.predictedPeriod = predictedPeriod;
+        public void setPredictedValue(float predictedValue) {
+            this.predictedValue = predictedValue;
         }
 
         @Override
         public String toString() {
             return "PredictionResponse{" +
-                    "predictedPeriod=" + predictedPeriod +
+                    "predictedValue=" + predictedValue +
                     '}';
         }
     }

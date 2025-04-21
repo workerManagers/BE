@@ -1,6 +1,7 @@
 // src/main/java/com/example/workerManagers/domain/restperiod/dto/RestPeriodResponseDto.java
 package com.example.workerManagers.domain.restperiod.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.Builder;
@@ -9,13 +10,14 @@ import lombok.Builder;
 @Setter
 @Builder
 public class RestPeriodResponseDto {
-    private int predictedPeriod;
+    @JsonProperty("predicted_value")
+    private int predictedValue;
     private String message;
     
     @Override
     public String toString() {
         return "RestPeriodResponseDto{" +
-                "predictedPeriod=" + predictedPeriod +
+                "predictedValue=" + predictedValue +
                 ", message='" + message + '\'' +
                 '}';
     }
