@@ -1,5 +1,6 @@
 package com.example.workerManagers.domain.users.dto;
 
+import com.example.workerManagers.domain.users.entity.User.UserType;
 import lombok.Getter;
 import lombok.Setter;
 import jakarta.validation.constraints.*;
@@ -23,7 +24,27 @@ public class SignupRequestDto {
     private Integer userAge;
 
     @Email(message = "올바른 이메일 형식이 아닙니다.")
-
     @Size(max = 50, message = "이메일은 50자 이내로 입력해주세요.")
     private String userEmail;
+
+    @NotNull(message = "회원 유형은 필수 입력값입니다.")
+    private UserType userType;
+
+    // 기업 회원인 경우에만 필요한 정보
+    private CompanyInfo companyInfo;
+
+    @Getter
+    @Setter
+    public static class CompanyInfo {
+        @NotBlank(message = "기업명은 필수 입력값입니다.")
+        @Size(max = 100, message = "기업명은 100자 이내로 입력해주세요.")
+        private String companyName;
+
+        @NotBlank(message = "기업 지역은 필수 입력값입니다.")
+        @Size(max = 50, message = "기업 지역은 50자 이내로 입력해주세요.")
+        private String companyRegion;
+
+        @Size(max = 20, message = "기업 코드는 20자 이내로 입력해주세요.")
+        private String companyCode;
+    }
 } 
