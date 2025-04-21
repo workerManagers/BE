@@ -24,6 +24,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.HashSet;
 
 @Slf4j
 @Service
@@ -62,10 +63,28 @@ public class UserServiceImpl implements UserService {
                 .build();
 
         // 기업 회원인 경우 기업 정보 저장
-        if (requestDto.getCompanyId() != null) {
-            Company company = companyRepository.findById(requestDto.getCompanyId())
-                    .orElseThrow(() -> new UserException("존재하지 않는 기업입니다."));
-            user.setCompany(company);
+        if (requestDto.getUserType() == User.UserType.COMPANY && requestDto.getCompanyInfo() != null) {
+            SignupRequestDto.CompanyInfo companyInfo = requestDto.getCompanyInfo();
+            
+            // 기업 정보 생성
+            Company company = Company.builder()
+                    .companyName(companyInfo.getCompanyName())
+                    .companyRegion(companyInfo.getCompanyRegion())
+                    .companyCode(companyInfo.getCompanyCode())
+                    .industrialAccidents(new HashSet<>())
+                    .restPeriods(new HashSet<>())
+                    .jobPosts(new HashSet<>())
+                    .aiMatchings(new HashSet<>())
+                    .applications(new HashSet<>())
+                    .resumes(new HashSet<>())
+                    .build();
+            
+            // 기업 정보 저장
+            Company savedCompany = companyRepository.save(company);
+            log.info("기업 정보 저장 완료: {}", savedCompany.getCompanyName());
+            
+            // 사용자와 기업 연결
+            user.setCompany(savedCompany);
         }
 
         // 사용자 저장
