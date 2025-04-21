@@ -3,46 +3,43 @@ package com.example.workerManagers.domain.jobpost.entity;
 import com.example.workerManagers.domain.aimatching.entity.AIMatching;
 import com.example.workerManagers.domain.application.entity.Application;
 import com.example.workerManagers.domain.company.entity.Company;
-import com.example.workerManagers.domain.industrialaccident.entity.IndustrialAccident;
 import com.example.workerManagers.domain.jobcode.entity.JobCode;
 import com.example.workerManagers.domain.resume.entity.Resume;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "job_post")
 public class JobPost {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "jobPost_id")
+    @Column(name = "job_post_id")
     private Long jobPostId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id", nullable = false)
+    @JoinColumn(name = "company_id")
     private Company company;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "industrialAccident_id", nullable = false)
-    private IndustrialAccident industrialAccident;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "job_code", nullable = false)
+    @JoinColumn(name = "job_code")
     private JobCode jobCode;
 
-    @Column(name = "jobPost_description")
+    @Column(name = "job_post_description", nullable = false, length = 500)
     private String jobPostDescription;
 
-    @Column(name = "job_period")
+    @Column(name = "job_period", nullable = false, length = 50)
     private String jobPeriod;
 
-    @Column(name = "deadline")
+    @Column(name = "job_region", nullable = false, length = 50)
+    private String jobRegion;
+
+    @Column(name = "deadline", nullable = false)
     private LocalDateTime deadline;
 
     @OneToMany(mappedBy = "jobPost", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -54,13 +51,25 @@ public class JobPost {
     @OneToMany(mappedBy = "jobPost", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Resume> resumes;
 
-    public void update(Company company, IndustrialAccident industrialAccident, JobCode jobCode,
-                     String jobPostDescription, String jobPeriod, LocalDateTime deadline) {
+    @Builder
+    public JobPost(Company company, JobCode jobCode, String jobPostDescription, String jobPeriod, String jobRegion, LocalDateTime deadline) {
         this.company = company;
-        this.industrialAccident = industrialAccident;
         this.jobCode = jobCode;
         this.jobPostDescription = jobPostDescription;
         this.jobPeriod = jobPeriod;
+        this.jobRegion = jobRegion;
+        this.deadline = deadline;
+        this.applications = new HashSet<>();
+        this.aiMatchings = new HashSet<>();
+        this.resumes = new HashSet<>();
+    }
+
+    public void update(Company company, JobCode jobCode, String jobPostDescription, String jobPeriod, String jobRegion, LocalDateTime deadline) {
+        this.company = company;
+        this.jobCode = jobCode;
+        this.jobPostDescription = jobPostDescription;
+        this.jobPeriod = jobPeriod;
+        this.jobRegion = jobRegion;
         this.deadline = deadline;
     }
 }

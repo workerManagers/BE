@@ -1,54 +1,53 @@
 package com.example.workerManagers.domain.industrialaccident.entity;
 
-import com.example.workerManagers.domain.aimatching.entity.AIMatching;
-import com.example.workerManagers.domain.application.entity.Application;
 import com.example.workerManagers.domain.company.entity.Company;
 import com.example.workerManagers.domain.jobcode.entity.JobCode;
-import com.example.workerManagers.domain.jobpost.entity.JobPost;
 import com.example.workerManagers.domain.restperiod.entity.RestPeriod;
-import com.example.workerManagers.domain.resume.entity.Resume;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Table(name = "industrial_accident")
 public class IndustrialAccident {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "industrial_accident_id")
     private Long industrialAccidentId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
     private Company company;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_code")
     private JobCode jobCode;
 
+    @Column(name = "industrial_accident_code", nullable = false)
     private String industrialAccidentCode;
+
+    @Column(name = "industrial_accident_name", nullable = false)
     private String industrialAccidentName;
+
+    @Column(name = "industrial_accident_date", nullable = false)
     private LocalDateTime industrialAccidentDate;
 
-    @OneToMany(mappedBy = "industrialAccident", cascade = CascadeType.ALL)
-    private Set<RestPeriod> restPeriods;
+    @OneToMany(mappedBy = "industrialAccident", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<RestPeriod> restPeriods = new HashSet<>();
 
-    @OneToMany(mappedBy = "industrialAccident", cascade = CascadeType.ALL)
-    private Set<JobPost> jobPosts;
-
-    @OneToMany(mappedBy = "industrialAccident", cascade = CascadeType.ALL)
-    private Set<AIMatching> aiMatchings;
-
-    @OneToMany(mappedBy = "industrialAccident", cascade = CascadeType.ALL)
-    private Set<Application> applications;
-
-    @OneToMany(mappedBy = "industrialAccident", cascade = CascadeType.ALL)
-    private Set<Resume> resumes;
+    @Builder
+    public IndustrialAccident(Company company, JobCode jobCode, String industrialAccidentCode,
+                             String industrialAccidentName, LocalDateTime industrialAccidentDate) {
+        this.company = company;
+        this.jobCode = jobCode;
+        this.industrialAccidentCode = industrialAccidentCode;
+        this.industrialAccidentName = industrialAccidentName;
+        this.industrialAccidentDate = industrialAccidentDate;
+    }
 
     public void update(Company company, JobCode jobCode, String industrialAccidentCode,
                       String industrialAccidentName, LocalDateTime industrialAccidentDate) {

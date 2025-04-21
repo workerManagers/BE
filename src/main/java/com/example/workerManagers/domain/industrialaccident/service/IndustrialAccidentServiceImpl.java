@@ -50,9 +50,6 @@ public class IndustrialAccidentServiceImpl implements IndustrialAccidentService 
                     .industrialAccidentCode(requestDto.getIndustrialAccidentCode())
                     .industrialAccidentName(requestDto.getIndustrialAccidentName())
                     .industrialAccidentDate(requestDto.getIndustrialAccidentDate())
-                    .jobPosts(new HashSet<>())
-                    .aiMatchings(new HashSet<>())
-                    .applications(new HashSet<>())
                     .build();
 
             // 산업재해 저장
