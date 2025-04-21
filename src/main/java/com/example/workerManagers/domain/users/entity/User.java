@@ -1,6 +1,7 @@
 package com.example.workerManagers.domain.users.entity;
 
 import com.example.workerManagers.domain.aimatching.entity.AIMatching;
+import com.example.workerManagers.domain.company.entity.Company;
 import com.example.workerManagers.domain.resume.entity.Resume;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -36,12 +37,25 @@ public class User {
     @Column(name = "user_age", nullable = false)
     private Integer userAge;
 
-    @Column(name = "user_email", nullable = false)
+    @Column(name = "user_email", nullable = false, unique = true)
     private String userEmail;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "user_type", nullable = false)
+    private UserType userType;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private Company company;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<AIMatching> aiMatchings;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private Set<Resume> resumes;
+
+    public enum UserType {
+        INDIVIDUAL,  // 일반 회원
+        COMPANY     // 기업 회원
+    }
 }

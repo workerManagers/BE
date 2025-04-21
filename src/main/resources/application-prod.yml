@@ -27,3 +27,7 @@ logging:
     org.springframework.security: INFO
   file:
     name: logs/application.log
+
+fastapi:
+  server:
+    url: https://port-0-workermanagers-ai-m9i2iiuc1e546d59.sel4.cloudtype.app  # FastAPI 서버 주소

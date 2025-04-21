@@ -35,8 +35,10 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/users/signup", "/users/login", "/users/logout", "/users/logout-test", 
+                .requestMatchers("/users/signup", "/users/login", "/users/logout", "/users/logout-test",
                     "/job-posts/**", "/companies/**", "/job-codes/**", "/industrial-accidents/**").permitAll()
+                .requestMatchers("/users/signup", "/users/login", "/users/logout", "/users/logout-test", "/job-posts/**", "/companies", "/job-codes",
+                        "/industrial-accidents", "/predict").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(tokenProvider, tokenBlacklist), UsernamePasswordAuthenticationFilter.class);

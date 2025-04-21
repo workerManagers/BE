@@ -1,5 +1,7 @@
 package com.example.workerManagers.domain.users.service;
 
+import com.example.workerManagers.domain.company.entity.Company;
+import com.example.workerManagers.domain.company.repository.CompanyRepository;
 import com.example.workerManagers.domain.users.dto.LoginRequestDto;
 import com.example.workerManagers.domain.users.dto.LoginResponseDto;
 import com.example.workerManagers.domain.users.dto.SignupRequestDto;
@@ -10,6 +12,7 @@ import com.example.workerManagers.domain.users.repository.UserRepository;
 import com.example.workerManagers.global.security.JwtTokenProvider;
 import com.example.workerManagers.global.security.TokenBlacklist;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,11 +27,13 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     
     private final UserRepository userRepository;
+    private final CompanyRepository companyRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder;
@@ -38,8 +43,11 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public SignupResponseDto signup(SignupRequestDto requestDto) {
+        log.info("회원가입 요청: {}", requestDto.getUserEmail());
+        
         // 이메일 중복 검사
         if (userRepository.existsByUserEmail(requestDto.getUserEmail())) {
+            log.warn("이메일 중복: {}", requestDto.getUserEmail());
             throw new UserException("이미 존재하는 이메일입니다.");
         }
 
@@ -53,14 +61,37 @@ public class UserServiceImpl implements UserService {
                 .userSex(requestDto.getUserSex())
                 .userAge(requestDto.getUserAge())
                 .userEmail(requestDto.getUserEmail())
+                .userType(requestDto.getUserType())
                 .build();
 
+        // 기업 회원인 경우 기업 정보 저장
+        if (requestDto.getUserType() == User.UserType.COMPANY && requestDto.getCompanyInfo() != null) {
+            SignupRequestDto.CompanyInfo companyInfo = requestDto.getCompanyInfo();
+            
+            // 기업 정보 생성
+            Company company = Company.builder()
+                    .companyName(companyInfo.getCompanyName())
+                    .companyRegion(companyInfo.getCompanyRegion())
+                    .companyCode(companyInfo.getCompanyCode())
+                    .build();
+            
+            // 기업 정보 저장
+            Company savedCompany = companyRepository.save(company);
+            log.info("기업 정보 저장 완료: {}", savedCompany.getCompanyName());
+            
+            // 사용자와 기업 연결
+            user.setCompany(savedCompany);
+        }
+
+        // 사용자 저장
         User savedUser = userRepository.save(user);
+        log.info("회원가입 완료: {}", savedUser.getUserEmail());
 
         return SignupResponseDto.builder()
                 .userId(savedUser.getUserId())
                 .userName(savedUser.getUserName())
                 .userEmail(savedUser.getUserEmail())
+                .userType(savedUser.getUserType())
                 .message("회원가입이 완료되었습니다.")
                 .build();
     }
