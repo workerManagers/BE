@@ -41,6 +41,10 @@ public class JobPostServiceImpl implements JobPostService {
                 .company(company)
                 .jobCode(jobCode)
                 .jobPostDescription(requestDto.getJobPostDescription())
+                .mainTasks(requestDto.getMainTasks())
+                .qualifications(requestDto.getQualifications())
+                .preferredQualifications(requestDto.getPreferredQualifications())
+                .idealCandidate(requestDto.getIdealCandidate())
                 .jobPeriod(requestDto.getJobPeriod())
                 .jobRegion(requestDto.getJobRegion())
                 .deadline(requestDto.getDeadline())
@@ -53,6 +57,10 @@ public class JobPostServiceImpl implements JobPostService {
                 .companyName(savedJobPost.getCompany().getCompanyName())
                 .jobName(savedJobPost.getJobCode().getJobName())
                 .jobPostDescription(savedJobPost.getJobPostDescription())
+                .mainTasks(savedJobPost.getMainTasks())
+                .qualifications(savedJobPost.getQualifications())
+                .preferredQualifications(savedJobPost.getPreferredQualifications())
+                .idealCandidate(savedJobPost.getIdealCandidate())
                 .jobPeriod(savedJobPost.getJobPeriod())
                 .jobRegion(savedJobPost.getJobRegion())
                 .deadline(savedJobPost.getDeadline())
@@ -81,6 +89,8 @@ public class JobPostServiceImpl implements JobPostService {
                 .orElseThrow(() -> new JobCodeException("직종 코드를 찾을 수 없습니다: " + requestDto.getJobName()));
 
         jobPost.update(company, jobCode, requestDto.getJobPostDescription(),
+                requestDto.getMainTasks(), requestDto.getQualifications(),
+                requestDto.getPreferredQualifications(), requestDto.getIdealCandidate(),
                 requestDto.getJobPeriod(), requestDto.getJobRegion(), requestDto.getDeadline());
 
         return JobPostResponseDto.builder()
@@ -88,6 +98,10 @@ public class JobPostServiceImpl implements JobPostService {
                 .companyName(jobPost.getCompany().getCompanyName())
                 .jobName(jobPost.getJobCode().getJobName())
                 .jobPostDescription(jobPost.getJobPostDescription())
+                .mainTasks(jobPost.getMainTasks())
+                .qualifications(jobPost.getQualifications())
+                .preferredQualifications(jobPost.getPreferredQualifications())
+                .idealCandidate(jobPost.getIdealCandidate())
                 .jobPeriod(jobPost.getJobPeriod())
                 .jobRegion(jobPost.getJobRegion())
                 .deadline(jobPost.getDeadline())
@@ -109,5 +123,33 @@ public class JobPostServiceImpl implements JobPostService {
         return jobPosts.stream()
                 .map(jobPost -> JobPostResponseDto.of(jobPost, "모든 모집공고 조회가 완료되었습니다."))
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public String convertToFastApiFormat(JobPostResponseDto jobPost) {
+        StringBuilder description = new StringBuilder();
+        
+        // 공고 설명
+        description.append(jobPost.getJobPostDescription()).append(". ");
+        
+        // 주요 업무
+        description.append("주요 업무: ").append(jobPost.getMainTasks()).append(". ");
+        
+        // 자격 요건
+        description.append("자격 요건: ").append(jobPost.getQualifications()).append(". ");
+        
+        // 우대 사항
+        description.append("우대 사항: ").append(jobPost.getPreferredQualifications()).append(". ");
+        
+        // 인재상
+        description.append("인재상: ").append(jobPost.getIdealCandidate()).append(". ");
+        
+        // 근무 기간
+        description.append("근무 기간: ").append(jobPost.getJobPeriod()).append(". ");
+        
+        // 근무 지역
+        description.append("근무 지역: ").append(jobPost.getJobRegion()).append(".");
+        
+        return description.toString();
     }
 } 

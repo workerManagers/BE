@@ -27,6 +27,22 @@ public class JobPostRequestDto {
     @Size(max = 500, message = "공고 설명은 최대 500자까지 입력 가능합니다.")
     private String jobPostDescription;
 
+    @NotBlank(message = "주요 업무는 필수입니다.")
+    @Size(max = 1000, message = "주요 업무는 최대 1000자까지 입력 가능합니다.")
+    private String mainTasks;
+
+    @NotBlank(message = "자격 요건은 필수입니다.")
+    @Size(max = 1000, message = "자격 요건은 최대 1000자까지 입력 가능합니다.")
+    private String qualifications;
+
+    @NotBlank(message = "우대 사항은 필수입니다.")
+    @Size(max = 1000, message = "우대 사항은 최대 1000자까지 입력 가능합니다.")
+    private String preferredQualifications;
+
+    @NotBlank(message = "인재상은 필수입니다.")
+    @Size(max = 500, message = "인재상은 최대 500자까지 입력 가능합니다.")
+    private String idealCandidate;
+
     @NotBlank(message = "근무 기간은 필수입니다.")
     @Size(max = 50, message = "근무 기간은 최대 50자까지 입력 가능합니다.")
     private String jobPeriod;

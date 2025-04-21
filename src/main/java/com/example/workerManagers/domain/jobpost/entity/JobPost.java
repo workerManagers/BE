@@ -33,6 +33,18 @@ public class JobPost {
     @Column(name = "job_post_description", nullable = false, length = 500)
     private String jobPostDescription;
 
+    @Column(name = "main_tasks", nullable = false, length = 1000)
+    private String mainTasks;
+
+    @Column(name = "qualifications", nullable = false, length = 1000)
+    private String qualifications;
+
+    @Column(name = "preferred_qualifications", nullable = false, length = 1000)
+    private String preferredQualifications;
+
+    @Column(name = "ideal_candidate", nullable = false, length = 500)
+    private String idealCandidate;
+
     @Column(name = "job_period", nullable = false, length = 50)
     private String jobPeriod;
 
@@ -52,10 +64,16 @@ public class JobPost {
     private Set<Resume> resumes;
 
     @Builder
-    public JobPost(Company company, JobCode jobCode, String jobPostDescription, String jobPeriod, String jobRegion, LocalDateTime deadline) {
+    public JobPost(Company company, JobCode jobCode, String jobPostDescription, String mainTasks, 
+                  String qualifications, String preferredQualifications, String idealCandidate,
+                  String jobPeriod, String jobRegion, LocalDateTime deadline) {
         this.company = company;
         this.jobCode = jobCode;
         this.jobPostDescription = jobPostDescription;
+        this.mainTasks = mainTasks;
+        this.qualifications = qualifications;
+        this.preferredQualifications = preferredQualifications;
+        this.idealCandidate = idealCandidate;
         this.jobPeriod = jobPeriod;
         this.jobRegion = jobRegion;
         this.deadline = deadline;
@@ -64,10 +82,16 @@ public class JobPost {
         this.resumes = new HashSet<>();
     }
 
-    public void update(Company company, JobCode jobCode, String jobPostDescription, String jobPeriod, String jobRegion, LocalDateTime deadline) {
+    public void update(Company company, JobCode jobCode, String jobPostDescription, String mainTasks,
+                      String qualifications, String preferredQualifications, String idealCandidate,
+                      String jobPeriod, String jobRegion, LocalDateTime deadline) {
         this.company = company;
         this.jobCode = jobCode;
         this.jobPostDescription = jobPostDescription;
+        this.mainTasks = mainTasks;
+        this.qualifications = qualifications;
+        this.preferredQualifications = preferredQualifications;
+        this.idealCandidate = idealCandidate;
         this.jobPeriod = jobPeriod;
         this.jobRegion = jobRegion;
         this.deadline = deadline;
