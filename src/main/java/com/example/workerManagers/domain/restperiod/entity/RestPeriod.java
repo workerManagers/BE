@@ -23,7 +23,7 @@ public class RestPeriod {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long restPeriod_id;
     
     @Column(nullable = false)
     private String disease;
