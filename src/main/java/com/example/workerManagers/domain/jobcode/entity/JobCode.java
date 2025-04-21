@@ -1,6 +1,5 @@
 package com.example.workerManagers.domain.jobcode.entity;
 
-import com.example.workerManagers.domain.aimatching.entity.AIMatching;
 import com.example.workerManagers.domain.application.entity.Application;
 import com.example.workerManagers.domain.company.entity.Company;
 import com.example.workerManagers.domain.industrialaccident.entity.IndustrialAccident;

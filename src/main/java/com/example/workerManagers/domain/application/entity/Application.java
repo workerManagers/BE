@@ -1,6 +1,5 @@
 package com.example.workerManagers.domain.application.entity;
 
-import com.example.workerManagers.domain.aimatching.entity.AIMatching;
 import com.example.workerManagers.domain.company.entity.Company;
 import com.example.workerManagers.domain.jobcode.entity.JobCode;
 import com.example.workerManagers.domain.jobpost.entity.JobPost;
@@ -34,10 +33,6 @@ public class Application {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "matching_id")
-    private AIMatching aiMatching;
-
     @Column(name = "job_description", length = 100)
     private String jobDescription;
 
@@ -49,24 +44,22 @@ public class Application {
 
     @Builder
     public Application(Company company, JobCode jobCode, JobPost jobPost, User user, 
-                      AIMatching aiMatching, String jobDescription, String jobPeriod, String applyResult) {
+                      String jobDescription, String jobPeriod, String applyResult) {
         this.company = company;
         this.jobCode = jobCode;
         this.jobPost = jobPost;
         this.user = user;
-        this.aiMatching = aiMatching;
         this.jobDescription = jobDescription;
         this.jobPeriod = jobPeriod;
         this.applyResult = applyResult;
     }
 
     public void update(Company company, JobCode jobCode, JobPost jobPost, User user,
-                      AIMatching aiMatching, String jobDescription, String jobPeriod, String applyResult) {
+                      String jobDescription, String jobPeriod, String applyResult) {
         this.company = company;
         this.jobCode = jobCode;
         this.jobPost = jobPost;
         this.user = user;
-        this.aiMatching = aiMatching;
         this.jobDescription = jobDescription;
         this.jobPeriod = jobPeriod;
         this.applyResult = applyResult;

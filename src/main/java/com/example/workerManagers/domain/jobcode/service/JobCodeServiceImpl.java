@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,16 +25,12 @@ public class JobCodeServiceImpl implements JobCodeService {
         JobCode jobCode = JobCode.builder()
                 .jobCode(requestDto.getJobCode())
                 .jobName(requestDto.getJobName())
-                .restPeriods(new HashSet<>())
-                .industrialAccidents(new HashSet<>())
-                .applications(new HashSet<>())
-                .resumes(new HashSet<>())
-                .jobPosts(new HashSet<>())
                 .build();
 
         JobCode savedJobCode = jobCodeRepository.save(jobCode);
 
         return JobCodeResponseDto.builder()
+                .jobCodeId(savedJobCode.getJobCodeId())
                 .jobCode(savedJobCode.getJobCode())
                 .jobName(savedJobCode.getJobName())
                 .message("직종 코드가 성공적으로 생성되었습니다.")
@@ -48,6 +43,7 @@ public class JobCodeServiceImpl implements JobCodeService {
                 .orElseThrow(() -> new JobCodeException("직종 코드를 찾을 수 없습니다."));
 
         return JobCodeResponseDto.builder()
+                .jobCodeId(jobCode.getJobCodeId())
                 .jobCode(jobCode.getJobCode())
                 .jobName(jobCode.getJobName())
                 .message("직종 코드 조회가 완료되었습니다.")

@@ -1,6 +1,5 @@
 package com.example.workerManagers.domain.resume.entity;
 
-import com.example.workerManagers.domain.aimatching.entity.AIMatching;
 import com.example.workerManagers.domain.company.entity.Company;
 import com.example.workerManagers.domain.jobcode.entity.JobCode;
 import com.example.workerManagers.domain.jobpost.entity.JobPost;
@@ -23,10 +22,6 @@ public class Resume {
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "matching_id")
-    private AIMatching aiMatching;
-
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_post_id")
     private JobPost jobPost;
 
@@ -45,10 +40,9 @@ public class Resume {
     private String resumeHistory;
 
     @Builder
-    public Resume(User user, AIMatching aiMatching, JobPost jobPost, Company company, 
+    public Resume(User user, JobPost jobPost, Company company, 
                  JobCode jobCode, String resumeArea, String resumeHistory) {
         this.user = user;
-        this.aiMatching = aiMatching;
         this.jobPost = jobPost;
         this.company = company;
         this.jobCode = jobCode;
@@ -56,10 +50,9 @@ public class Resume {
         this.resumeHistory = resumeHistory;
     }
 
-    public void update(User user, AIMatching aiMatching, JobPost jobPost, Company company,
+    public void update(User user, JobPost jobPost, Company company,
                       JobCode jobCode, String resumeArea, String resumeHistory) {
         this.user = user;
-        this.aiMatching = aiMatching;
         this.jobPost = jobPost;
         this.company = company;
         this.jobCode = jobCode;

@@ -27,12 +27,6 @@ public class CompanyServiceImpl implements CompanyService {
                 .companyName(requestDto.getCompanyName())
                 .companyRegion(requestDto.getCompanyRegion())
                 .companyCode(requestDto.getCompanyCode())
-                .industrialAccidents(new HashSet<>())
-                .restPeriods(new HashSet<>())
-                .jobPosts(new HashSet<>())
-                .aiMatchings(new HashSet<>())
-                .applications(new HashSet<>())
-                .resumes(new HashSet<>())
                 .build();
 
         Company savedCompany = companyRepository.save(company);

@@ -1,94 +1,85 @@
 package com.example.workerManagers.domain.aimatching.service;
 
 import com.example.workerManagers.domain.aimatching.dto.AIMatchingRequestDto;
-import com.example.workerManagers.domain.aimatching.dto.AIMatchingResponseDto;
-import com.example.workerManagers.domain.aimatching.entity.AIMatching;
-import com.example.workerManagers.domain.aimatching.exception.AIMatchingException;
-import com.example.workerManagers.domain.aimatching.repository.AIMatchingRepository;
-import com.example.workerManagers.domain.application.entity.Application;
-import com.example.workerManagers.domain.company.entity.Company;
-import com.example.workerManagers.domain.company.exception.CompanyException;
-import com.example.workerManagers.domain.company.repository.CompanyRepository;
-import com.example.workerManagers.domain.industrialaccident.entity.IndustrialAccident;
-import com.example.workerManagers.domain.industrialaccident.exception.IndustrialAccidentException;
-import com.example.workerManagers.domain.industrialaccident.repository.IndustrialAccidentRepository;
-import com.example.workerManagers.domain.jobcode.entity.JobCode;
-import com.example.workerManagers.domain.jobcode.exception.JobCodeException;
-import com.example.workerManagers.domain.jobcode.repository.JobCodeRepository;
+import com.example.workerManagers.domain.aimatching.dto.JobPostMatchingDto;
 import com.example.workerManagers.domain.jobpost.entity.JobPost;
-import com.example.workerManagers.domain.jobpost.exception.JobPostException;
 import com.example.workerManagers.domain.jobpost.repository.JobPostRepository;
-import com.example.workerManagers.domain.resume.entity.Resume;
-import com.example.workerManagers.domain.users.entity.User;
-import com.example.workerManagers.domain.users.exception.UserException;
-import com.example.workerManagers.domain.users.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AIMatchingServiceImpl implements AIMatchingService {
 
-    private final AIMatchingRepository aiMatchingRepository;
-    private final CompanyRepository companyRepository;
-    private final JobCodeRepository jobCodeRepository;
     private final JobPostRepository jobPostRepository;
-    private final UserRepository userRepository;
+    private final WebClient webClient;
+
+    @Value("${fastapi.url:https://port-0-workermanagers-ai-m9i2iiuc1e546d59.sel4.cloudtype.app}")
+    private String fastApiUrl;
 
     @Override
-    @Transactional
-    public AIMatchingResponseDto createAIMatching(AIMatchingRequestDto requestDto) {
-        Company company = companyRepository.findByCompanyName(requestDto.getCompanyName())
-                .orElseThrow(() -> new CompanyException("Company not found"));
+    public List<JobPostMatchingDto> getMatchingScoresForAllJobPosts(String resumeText) {
+        List<JobPost> jobPosts = jobPostRepository.findAll();
 
-        JobCode jobCode = jobCodeRepository.findByJobName(requestDto.getJobName())
-                .orElseThrow(() -> new JobCodeException("JobCode not found"));
+        return jobPosts.stream()
+                .map(jobPost -> {
+                    AIMatchingRequestDto requestDto = convertJobPostToFastApiRequest(jobPost, resumeText);
+                    Double matchingScore = getMatchingScore(requestDto);
 
-        JobPost jobPost = jobPostRepository.findById(requestDto.getJobPostId())
-                .orElseThrow(() -> new JobPostException("JobPost not found"));
-
-        User user = userRepository.findById(requestDto.getUserId())
-                .orElseThrow(() -> new UserException("User not found"));
-
-        AIMatching aiMatching = AIMatching.builder()
-                .company(company)
-                .jobCode(jobCode)
-                .jobPost(jobPost)
-                .user(user)
-                .matchingScore(requestDto.getMatchingScore())
-                .build();
-
-        AIMatching savedAIMatching = aiMatchingRepository.save(aiMatching);
-
-        return AIMatchingResponseDto.builder()
-                .matchingId(savedAIMatching.getMatchingId())
-                .companyName(savedAIMatching.getCompany().getCompanyName())
-                .jobName(savedAIMatching.getJobCode().getJobName())
-                .jobPostId(savedAIMatching.getJobPost().getJobPostId())
-                .userId(savedAIMatching.getUser().getUserId())
-                .matchingScore(savedAIMatching.getMatchingScore())
-                .message("AI 매칭이 성공적으로 생성되었습니다.")
-                .build();
+                    return JobPostMatchingDto.builder()
+                            .jobPostId(jobPost.getJobPostId())
+                            .companyName(jobPost.getCompany().getCompanyName())
+                            .jobName(jobPost.getJobCode().getJobName())
+                            .jobPostDescription(jobPost.getJobPostDescription())
+                            .matchingScore(matchingScore)
+                            .build();
+                })
+                .sorted((a, b) -> b.getMatchingScore().compareTo(a.getMatchingScore()))
+                .collect(Collectors.toList());
     }
 
-    @Override
-    public AIMatchingResponseDto getAIMatching(Long matchingId) {
-        AIMatching aiMatching = aiMatchingRepository.findById(matchingId)
-                .orElseThrow(() -> new AIMatchingException("AIMatching not found"));
+    private Double getMatchingScore(AIMatchingRequestDto requestDto) {
+        return webClient.post()
+                .uri(fastApiUrl + "/compare")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDto)
+                .retrieve()
+                .bodyToMono(Double.class)
+                .block();
+    }
 
-        return AIMatchingResponseDto.builder()
-                .matchingId(aiMatching.getMatchingId())
-                .companyName(aiMatching.getCompany().getCompanyName())
-                .jobName(aiMatching.getJobCode().getJobName())
-                .jobPostId(aiMatching.getJobPost().getJobPostId())
-                .userId(aiMatching.getUser().getUserId())
-                .matchingScore(aiMatching.getMatchingScore())
-                .message("AI 매칭 조회가 완료되었습니다.")
-                .build();
+    private AIMatchingRequestDto convertJobPostToFastApiRequest(JobPost jobPost, String resumeText) {
+        String jobPostDescription = String.format(
+            "[%s - %s]\n\n%s\n\n[주요 업무]\n%s\n\n[자격 요건]\n%s\n\n[우대 사항]\n%s\n\n[인재상]\n%s\n\n[근무 기간]\n%s\n\n[근무 지역]\n%s\n\n[마감일]\n%s",
+            jobPost.getCompany().getCompanyName(),
+            jobPost.getJobCode().getJobName(),
+            jobPost.getJobPostDescription(),
+            jobPost.getMainTasks(),
+            jobPost.getQualifications(),
+            jobPost.getPreferredQualifications(),
+            jobPost.getIdealCandidate(),
+            jobPost.getJobPeriod(),
+            jobPost.getJobRegion(),
+            jobPost.getDeadline().toString()
+        );
+
+        AIMatchingRequestDto.JobPostData jobPostData = new AIMatchingRequestDto.JobPostData();
+        jobPostData.setJobPost_id(jobPost.getJobPostId());
+        jobPostData.setJobPost_description(jobPostDescription);
+
+        AIMatchingRequestDto requestDto = new AIMatchingRequestDto();
+        requestDto.setInput_text(resumeText);
+        requestDto.setDataset(Collections.singletonList(jobPostData));
+
+        return requestDto;
     }
 } 

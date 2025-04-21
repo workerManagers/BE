@@ -74,7 +74,6 @@ public class UserServiceImpl implements UserService {
                     .industrialAccidents(new HashSet<>())
                     .restPeriods(new HashSet<>())
                     .jobPosts(new HashSet<>())
-                    .aiMatchings(new HashSet<>())
                     .applications(new HashSet<>())
                     .resumes(new HashSet<>())
                     .build();

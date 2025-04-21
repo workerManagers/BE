@@ -89,9 +89,10 @@ public class JobPostServiceImpl implements JobPostService {
                 .orElseThrow(() -> new JobCodeException("직종 코드를 찾을 수 없습니다: " + requestDto.getJobName()));
 
         jobPost.update(company, jobCode, requestDto.getJobPostDescription(),
+                requestDto.getJobPeriod(), requestDto.getDeadline(),
                 requestDto.getMainTasks(), requestDto.getQualifications(),
                 requestDto.getPreferredQualifications(), requestDto.getIdealCandidate(),
-                requestDto.getJobPeriod(), requestDto.getJobRegion(), requestDto.getDeadline());
+                requestDto.getJobRegion());
 
         return JobPostResponseDto.builder()
                 .jobPostId(jobPost.getJobPostId())
