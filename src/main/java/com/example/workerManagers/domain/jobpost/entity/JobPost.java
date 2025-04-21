@@ -3,7 +3,6 @@ package com.example.workerManagers.domain.jobpost.entity;
 import com.example.workerManagers.domain.application.entity.Application;
 import com.example.workerManagers.domain.company.entity.Company;
 import com.example.workerManagers.domain.jobcode.entity.JobCode;
-import com.example.workerManagers.domain.resume.entity.Resume;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,6 +19,9 @@ public class JobPost {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "job_post_id")
     private Long jobPostId;
+
+    @Column(name = "job_name")
+    private String jobName;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
@@ -56,13 +58,11 @@ public class JobPost {
     @OneToMany(mappedBy = "jobPost", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Application> applications = new ArrayList<>();
 
-    @OneToMany(mappedBy = "jobPost", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Resume> resumes = new ArrayList<>();
-
     @Builder
-    public JobPost(Company company, JobCode jobCode, String jobPostDescription, String jobPeriod,
+    public JobPost(String jobName, Company company, JobCode jobCode, String jobPostDescription, String jobPeriod,
                   LocalDateTime deadline, String mainTasks, String qualifications,
                   String preferredQualifications, String idealCandidate, String jobRegion) {
+        this.jobName = jobName;
         this.company = company;
         this.jobCode = jobCode;
         this.jobPostDescription = jobPostDescription;

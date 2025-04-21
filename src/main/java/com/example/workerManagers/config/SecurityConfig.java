@@ -36,7 +36,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/users/signup", "/users/login", "/users/logout", "/users/logout-test",
-                    "/job-posts/**", "/companies/**", "/job-codes/**", "/industrial-accidents/**", "/predict/**").permitAll()
+                    "/job-posts/**", "/companies/**", "/job-codes/**", "/industrial-accidents/**", "/predict/**", "/ai-matchings/**", "/resumes/**", "/applications/**").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(tokenProvider, tokenBlacklist), UsernamePasswordAuthenticationFilter.class);

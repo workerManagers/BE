@@ -10,6 +10,12 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Collections;
 import java.util.List;
@@ -29,12 +35,10 @@ public class AIMatchingServiceImpl implements AIMatchingService {
     @Override
     public List<JobPostMatchingDto> getMatchingScoresForAllJobPosts(String resumeText) {
         List<JobPost> jobPosts = jobPostRepository.findAll();
-
         return jobPosts.stream()
                 .map(jobPost -> {
                     AIMatchingRequestDto requestDto = convertJobPostToFastApiRequest(jobPost, resumeText);
                     Double matchingScore = getMatchingScore(requestDto);
-
                     return JobPostMatchingDto.builder()
                             .jobPostId(jobPost.getJobPostId())
                             .companyName(jobPost.getCompany().getCompanyName())
@@ -47,13 +51,36 @@ public class AIMatchingServiceImpl implements AIMatchingService {
                 .collect(Collectors.toList());
     }
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    private static class MatchingScoreResponse {
+        private Double score;
+        private String message;
+    }
+
     private Double getMatchingScore(AIMatchingRequestDto requestDto) {
         return webClient.post()
                 .uri(fastApiUrl + "/compare")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(requestDto)
                 .retrieve()
-                .bodyToMono(Double.class)
+                .bodyToMono(String.class)
+                .map(response -> {
+                    try {
+                        ObjectMapper mapper = new ObjectMapper();
+                        JsonNode root = mapper.readTree(response);
+                        if (root.isArray() && root.size() > 0) {
+                            String similarity = root.get(0).get("similarity").asText();
+                            // "76.62점"에서 숫자만 추출
+                            return Double.parseDouble(similarity.replaceAll("[^0-9.]", ""));
+                        }
+                        throw new RuntimeException("Invalid response format");
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to parse FastAPI response", e);
+                    }
+                })
                 .block();
     }
 

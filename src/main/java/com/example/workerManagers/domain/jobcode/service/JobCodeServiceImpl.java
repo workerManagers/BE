@@ -29,7 +29,6 @@ public class JobCodeServiceImpl implements JobCodeService {
                 .restPeriods(new HashSet<>())
                 .industrialAccidents(new HashSet<>())
                 .applications(new HashSet<>())
-                .resumes(new HashSet<>())
                 .jobPosts(new HashSet<>())
                 .build();
 

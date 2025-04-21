@@ -79,7 +79,6 @@ public class UserServiceImpl implements UserService {
                     .restPeriods(new HashSet<>())
                     .jobPosts(new HashSet<>())
                     .applications(new HashSet<>())
-                    .resumes(new HashSet<>())
                     .user(savedUser)  // 저장된 User 엔티티 설정
                     .build();
             
