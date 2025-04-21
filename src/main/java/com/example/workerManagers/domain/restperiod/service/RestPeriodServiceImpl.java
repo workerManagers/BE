@@ -48,6 +48,7 @@ public class RestPeriodServiceImpl implements RestPeriodService {
 
             // 예측 결과를 데이터베이스에 저장
             RestPeriod restPeriod = RestPeriod.builder()
+                    .restPeriod_id(null)
                     .disease(requestDto.getDisease())
                     .sex(requestDto.getSex())
                     .surgery(requestDto.getSurgery())

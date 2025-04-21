@@ -10,6 +10,9 @@ import lombok.Builder;
 @Setter
 @Builder
 public class RestPeriodResponseDto {
+    @JsonProperty("restPeriod_id")
+    private Long restPeriodId;
+    
     @JsonProperty("predicted_value")
     private int predictedValue;
     private String message;
@@ -17,7 +20,8 @@ public class RestPeriodResponseDto {
     @Override
     public String toString() {
         return "RestPeriodResponseDto{" +
-                "predictedValue=" + predictedValue +
+                "restPeriodId=" + restPeriodId +
+                ", predictedValue=" + predictedValue +
                 ", message='" + message + '\'' +
                 '}';
     }
