@@ -26,6 +26,8 @@ public class JobCodeServiceImpl implements JobCodeService {
         JobCode jobCode = JobCode.builder()
                 .jobCode(requestDto.getJobCode())
                 .jobName(requestDto.getJobName())
+                .industryCategory(requestDto.getIndustryCategory())
+                .industrySubcategory(requestDto.getIndustrySubcategory())
                 .restPeriods(new HashSet<>())
                 .industrialAccidents(new HashSet<>())
                 .applications(new HashSet<>())
@@ -35,8 +37,11 @@ public class JobCodeServiceImpl implements JobCodeService {
         JobCode savedJobCode = jobCodeRepository.save(jobCode);
 
         return JobCodeResponseDto.builder()
+                .jobCodeId(savedJobCode.getJobCodeId())
                 .jobCode(savedJobCode.getJobCode())
                 .jobName(savedJobCode.getJobName())
+                .industryCategory(savedJobCode.getIndustryCategory())
+                .industrySubcategory(savedJobCode.getIndustrySubcategory())
                 .message("직종 코드가 성공적으로 생성되었습니다.")
                 .build();
     }

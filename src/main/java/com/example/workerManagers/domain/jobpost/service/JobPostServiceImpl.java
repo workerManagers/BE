@@ -48,6 +48,7 @@ public class JobPostServiceImpl implements JobPostService {
                 .jobPeriod(requestDto.getJobPeriod())
                 .jobRegion(requestDto.getJobRegion())
                 .deadline(requestDto.getDeadline())
+                .careerType(requestDto.getCareerType())
                 .build();
 
         JobPost savedJobPost = jobPostRepository.save(jobPost);
@@ -64,6 +65,7 @@ public class JobPostServiceImpl implements JobPostService {
                 .jobPeriod(savedJobPost.getJobPeriod())
                 .jobRegion(savedJobPost.getJobRegion())
                 .deadline(savedJobPost.getDeadline())
+                .careerType(savedJobPost.getCareerType())
                 .message("채용 공고가 성공적으로 생성되었습니다.")
                 .build();
     }
@@ -90,9 +92,9 @@ public class JobPostServiceImpl implements JobPostService {
 
         jobPost.update(company, jobCode, requestDto.getJobPostDescription(),
                 requestDto.getJobPeriod(), requestDto.getDeadline(),
-                requestDto.getMainTasks(), requestDto.getQualifications(),
-                requestDto.getPreferredQualifications(), requestDto.getIdealCandidate(),
-                requestDto.getJobRegion());
+                requestDto.getCareerType(), requestDto.getMainTasks(),
+                requestDto.getQualifications(), requestDto.getPreferredQualifications(),
+                requestDto.getIdealCandidate(), requestDto.getJobRegion());
 
         return JobPostResponseDto.builder()
                 .jobPostId(jobPost.getJobPostId())
@@ -106,6 +108,7 @@ public class JobPostServiceImpl implements JobPostService {
                 .jobPeriod(jobPost.getJobPeriod())
                 .jobRegion(jobPost.getJobRegion())
                 .deadline(jobPost.getDeadline())
+                .careerType(jobPost.getCareerType())
                 .message("채용 공고가 성공적으로 수정되었습니다.")
                 .build();
     }

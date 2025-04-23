@@ -1,6 +1,7 @@
 package com.example.workerManagers.domain.jobpost.dto;
 
 import com.example.workerManagers.domain.jobpost.entity.JobPost;
+import com.example.workerManagers.domain.jobpost.entity.CareerType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,6 +25,7 @@ public class JobPostResponseDto {
     private String jobPeriod;
     private String jobRegion;
     private LocalDateTime deadline;
+    private CareerType careerType;
     private String message;
 
     public static JobPostResponseDto of(JobPost jobPost, String message) {
@@ -39,6 +41,7 @@ public class JobPostResponseDto {
                 .jobPeriod(jobPost.getJobPeriod())
                 .jobRegion(jobPost.getJobRegion())
                 .deadline(jobPost.getDeadline())
+                .careerType(jobPost.getCareerType())
                 .message(message)
                 .build();
     }

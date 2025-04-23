@@ -27,6 +27,14 @@ public class JobCode {
     @Column(length = 20, nullable = false)
     private String jobName;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "industry_category", nullable = false)
+    private IndustryCategory industryCategory;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "industry_subcategory", nullable = false)
+    private IndustrySubcategory industrySubcategory;
+
     @OneToMany(mappedBy = "jobCode", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<RestPeriod> restPeriods;
 
@@ -38,4 +46,12 @@ public class JobCode {
 
     @OneToMany(mappedBy = "jobCode", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<JobPost> jobPosts;
+
+    @PrePersist
+    @PreUpdate
+    private void validateCategories() {
+        if (industrySubcategory.getMainCategory() != industryCategory) {
+            throw new IllegalStateException("하위 카테고리는 상위 카테고리에 속해야 합니다.");
+        }
+    }
 }
