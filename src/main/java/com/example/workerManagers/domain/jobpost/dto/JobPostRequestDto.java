@@ -1,5 +1,6 @@
 package com.example.workerManagers.domain.jobpost.dto;
 
+import com.example.workerManagers.domain.jobpost.entity.CareerType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -53,4 +54,7 @@ public class JobPostRequestDto {
 
     @NotNull(message = "마감일은 필수입니다.")
     private LocalDateTime deadline;
+
+    @NotNull(message = "경력 유형은 필수입니다.")
+    private CareerType careerType;
 } 

@@ -40,6 +40,10 @@ public class JobPost {
     @Column(name = "deadline", nullable = false)
     private LocalDateTime deadline;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CareerType careerType;
+
     @Column(name = "main_tasks", nullable = false, length = 1000)
     private String mainTasks;
 
@@ -60,7 +64,7 @@ public class JobPost {
 
     @Builder
     public JobPost(String jobName, Company company, JobCode jobCode, String jobPostDescription, String jobPeriod,
-                  LocalDateTime deadline, String mainTasks, String qualifications,
+                  LocalDateTime deadline, CareerType careerType, String mainTasks, String qualifications,
                   String preferredQualifications, String idealCandidate, String jobRegion) {
         this.jobName = jobName;
         this.company = company;
@@ -68,6 +72,7 @@ public class JobPost {
         this.jobPostDescription = jobPostDescription;
         this.jobPeriod = jobPeriod;
         this.deadline = deadline;
+        this.careerType = careerType;
         this.mainTasks = mainTasks;
         this.qualifications = qualifications;
         this.preferredQualifications = preferredQualifications;
@@ -76,13 +81,14 @@ public class JobPost {
     }
 
     public void update(Company company, JobCode jobCode, String jobPostDescription, String jobPeriod,
-                      LocalDateTime deadline, String mainTasks, String qualifications,
+                      LocalDateTime deadline, CareerType careerType, String mainTasks, String qualifications,
                       String preferredQualifications, String idealCandidate, String jobRegion) {
         this.company = company;
         this.jobCode = jobCode;
         this.jobPostDescription = jobPostDescription;
         this.jobPeriod = jobPeriod;
         this.deadline = deadline;
+        this.careerType = careerType;
         this.mainTasks = mainTasks;
         this.qualifications = qualifications;
         this.preferredQualifications = preferredQualifications;

@@ -1,5 +1,7 @@
 package com.example.workerManagers.domain.jobcode.dto;
 
+import com.example.workerManagers.domain.jobcode.entity.IndustryCategory;
+import com.example.workerManagers.domain.jobcode.entity.IndustrySubcategory;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,5 +17,7 @@ public class JobCodeResponseDto {
     private Long jobCodeId;
     private String jobCode;
     private String jobName;
+    private IndustryCategory industryCategory;
+    private IndustrySubcategory industrySubcategory;
     private String message;
 } 
