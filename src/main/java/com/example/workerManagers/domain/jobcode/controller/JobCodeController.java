@@ -30,6 +30,12 @@ public class JobCodeController {
         return ResponseEntity.ok(responseDto);
     }
 
+    @GetMapping("/name/{jobName}")
+    public ResponseEntity<JobCodeResponseDto> getJobCodeByName(@PathVariable String jobName) {
+        JobCodeResponseDto responseDto = jobCodeService.getJobCodeByName(jobName);
+        return ResponseEntity.ok(responseDto);
+    }
+
     @GetMapping
     public ResponseEntity<List<JobCodeResponseDto>> getAllJobCodes() {
         List<JobCodeResponseDto> jobCodes = jobCodeService.getAllJobCodes();

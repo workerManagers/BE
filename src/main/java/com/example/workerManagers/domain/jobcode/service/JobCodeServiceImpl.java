@@ -70,4 +70,19 @@ public class JobCodeServiceImpl implements JobCodeService {
                         .build())
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public JobCodeResponseDto getJobCodeByName(String jobName) {
+        JobCode jobCode = jobCodeRepository.findByJobName(jobName)
+                .orElseThrow(() -> new JobCodeException("직종 코드를 찾을 수 없습니다."));
+
+        return JobCodeResponseDto.builder()
+                .jobCodeId(jobCode.getJobCodeId())
+                .jobCode(jobCode.getJobCode())
+                .jobName(jobCode.getJobName())
+                .industryCategory(jobCode.getIndustryCategory())
+                .industrySubcategory(jobCode.getIndustrySubcategory())
+                .message("직종 코드 조회가 완료되었습니다.")
+                .build();
+    }
 } 

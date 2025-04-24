@@ -8,5 +8,6 @@ import java.util.List;
 public interface JobCodeService {
     JobCodeResponseDto createJobCode(JobCodeRequestDto requestDto);
     JobCodeResponseDto getJobCode(Long jobCodeId);
+    JobCodeResponseDto getJobCodeByName(String jobName);
     List<JobCodeResponseDto> getAllJobCodes();
 } 
