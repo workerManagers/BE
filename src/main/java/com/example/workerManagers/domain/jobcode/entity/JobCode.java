@@ -21,9 +21,6 @@ public class JobCode {
     @Column(name = "job_code_id")
     private Long jobCodeId;
 
-    @Column(name = "job_code", length = 20, nullable = false)
-    private String jobCode;
-
     @Column(length = 20, nullable = false)
     private String jobName;
 

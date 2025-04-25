@@ -15,7 +15,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class JobCodeResponseDto {
     private Long jobCodeId;
-    private String jobCode;
     private String jobName;
     private IndustryCategory industryCategory;
     private IndustrySubcategory industrySubcategory;

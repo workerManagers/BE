@@ -4,7 +4,7 @@ spring:
       - optional:file:.env[.properties]
       - optional:file:application-${spring.profiles.active}.yml
   profiles:
-    active: prod
+    active: dev
 
 fastapi:
   server:

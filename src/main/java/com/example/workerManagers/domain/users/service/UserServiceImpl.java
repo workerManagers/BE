@@ -6,6 +6,7 @@ import com.example.workerManagers.domain.users.dto.LoginRequestDto;
 import com.example.workerManagers.domain.users.dto.LoginResponseDto;
 import com.example.workerManagers.domain.users.dto.SignupRequestDto;
 import com.example.workerManagers.domain.users.dto.SignupResponseDto;
+import com.example.workerManagers.domain.users.dto.UserResponseDto;
 import com.example.workerManagers.domain.users.entity.User;
 import com.example.workerManagers.domain.users.exception.UserException;
 import com.example.workerManagers.domain.users.repository.UserRepository;
@@ -170,5 +171,45 @@ public class UserServiceImpl implements UserService {
         log.info("SecurityContext가 초기화되었습니다.");
         
         log.info("로그아웃 처리 완료");
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponseDto getUserInfo(String userEmail) {
+        log.info("사용자 정보 조회 시작: {}", userEmail);
+        
+        User user = userRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> {
+                    log.error("존재하지 않는 사용자: {}", userEmail);
+                    return new UserException("사용자를 찾을 수 없습니다.");
+                });
+
+        UserResponseDto.UserResponseDtoBuilder builder = UserResponseDto.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .userEmail(user.getUserEmail())
+                .userSex(user.getUserSex())
+                .userAge(user.getUserAge())
+                .userType(user.getUserType());
+
+        // 기업 회원인 경우 기업 정보도 포함
+        if (user.getUserType() == User.UserType.COMPANY) {
+            Company company = companyRepository.findByUser(user)
+                    .orElse(null);
+            
+            if (company != null) {
+                UserResponseDto.CompanyInfo companyInfo = UserResponseDto.CompanyInfo.builder()
+                        .companyName(company.getCompanyName())
+                        .companyRegion(company.getCompanyRegion())
+                        .companyCode(company.getCompanyCode())
+                        .build();
+                
+                builder.companyInfo(companyInfo);
+            }
+        }
+
+        UserResponseDto responseDto = builder.build();
+        log.info("사용자 정보 조회 완료: {}", userEmail);
+        return responseDto;
     }
 } 

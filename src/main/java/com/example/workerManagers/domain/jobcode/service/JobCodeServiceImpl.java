@@ -24,7 +24,6 @@ public class JobCodeServiceImpl implements JobCodeService {
     @Transactional
     public JobCodeResponseDto createJobCode(JobCodeRequestDto requestDto) {
         JobCode jobCode = JobCode.builder()
-                .jobCode(requestDto.getJobCode())
                 .jobName(requestDto.getJobName())
                 .industryCategory(requestDto.getIndustryCategory())
                 .industrySubcategory(requestDto.getIndustrySubcategory())
@@ -38,11 +37,10 @@ public class JobCodeServiceImpl implements JobCodeService {
 
         return JobCodeResponseDto.builder()
                 .jobCodeId(savedJobCode.getJobCodeId())
-                .jobCode(savedJobCode.getJobCode())
                 .jobName(savedJobCode.getJobName())
                 .industryCategory(savedJobCode.getIndustryCategory())
                 .industrySubcategory(savedJobCode.getIndustrySubcategory())
-                .message("직종 코드가 성공적으로 생성되었습니다.")
+                .message("직종이 성공적으로 생성되었습니다.")
                 .build();
     }
 
@@ -52,8 +50,10 @@ public class JobCodeServiceImpl implements JobCodeService {
                 .orElseThrow(() -> new JobCodeException("직종 코드를 찾을 수 없습니다."));
 
         return JobCodeResponseDto.builder()
-                .jobCode(jobCode.getJobCode())
+                .jobCodeId(jobCode.getJobCodeId())
                 .jobName(jobCode.getJobName())
+                .industryCategory(jobCode.getIndustryCategory())
+                .industrySubcategory(jobCode.getIndustrySubcategory())
                 .message("직종 코드 조회가 완료되었습니다.")
                 .build();
     }
@@ -64,8 +64,9 @@ public class JobCodeServiceImpl implements JobCodeService {
         return jobCodes.stream()
                 .map(jobCode -> JobCodeResponseDto.builder()
                         .jobCodeId(jobCode.getJobCodeId())
-                        .jobCode(jobCode.getJobCode())
                         .jobName(jobCode.getJobName())
+                        .industryCategory(jobCode.getIndustryCategory())
+                        .industrySubcategory(jobCode.getIndustrySubcategory())
                         .message("직종 코드 조회가 완료되었습니다.")
                         .build())
                 .collect(Collectors.toList());
@@ -78,7 +79,6 @@ public class JobCodeServiceImpl implements JobCodeService {
 
         return JobCodeResponseDto.builder()
                 .jobCodeId(jobCode.getJobCodeId())
-                .jobCode(jobCode.getJobCode())
                 .jobName(jobCode.getJobName())
                 .industryCategory(jobCode.getIndustryCategory())
                 .industrySubcategory(jobCode.getIndustrySubcategory())

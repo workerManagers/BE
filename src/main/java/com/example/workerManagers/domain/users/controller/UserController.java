@@ -5,6 +5,7 @@ import com.example.workerManagers.domain.users.dto.LoginResponseDto;
 import com.example.workerManagers.domain.users.dto.SignupRequestDto;
 import com.example.workerManagers.domain.users.dto.SignupResponseDto;
 import com.example.workerManagers.domain.users.dto.LogoutResponseDto;
+import com.example.workerManagers.domain.users.dto.UserResponseDto;
 import com.example.workerManagers.domain.users.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -12,11 +13,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -121,5 +119,14 @@ public class UserController {
             return bearerToken.substring(7);
         }
         return null;
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponseDto> getUserInfo(Authentication authentication) {
+        log.info("사용자 정보 조회 요청 수신");
+        String userEmail = authentication.getName();
+        UserResponseDto responseDto = userService.getUserInfo(userEmail);
+        log.info("사용자 정보 조회 완료: {}", userEmail);
+        return ResponseEntity.ok(responseDto);
     }
 } 

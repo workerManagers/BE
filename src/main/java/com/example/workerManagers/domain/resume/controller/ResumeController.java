@@ -9,6 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/resumes")
@@ -30,23 +33,44 @@ public class ResumeController {
     }
 
     @GetMapping
-    public ResponseEntity<ResumeResponseDto> getResume(Authentication authentication) {
+    public ResponseEntity<?> getResume(Authentication authentication) {
         String userEmail = authentication.getName();
-        return ResponseEntity.ok(resumeService.getResume(userEmail));
+        try {
+            ResumeResponseDto responseDto = resumeService.getResume(userEmail);
+            return ResponseEntity.ok(responseDto);
+        } catch (IllegalArgumentException e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "생성된 이력서가 없습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
     }
 
     @PutMapping
-    public ResponseEntity<ResumeResponseDto> updateResume(
+    public ResponseEntity<?> updateResume(
             @RequestBody ResumeRequestDto requestDto,
             Authentication authentication) {
         String userEmail = authentication.getName();
-        return ResponseEntity.ok(resumeService.updateResume(requestDto, userEmail));
+        try {
+            return ResponseEntity.ok(resumeService.updateResume(requestDto, userEmail));
+        } catch (IllegalArgumentException e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "수정할 이력서가 없습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> deleteResume(Authentication authentication) {
+    public ResponseEntity<?> deleteResume(Authentication authentication) {
         String userEmail = authentication.getName();
-        resumeService.deleteResume(userEmail);
-        return ResponseEntity.ok().build();
+        try {
+            resumeService.deleteResume(userEmail);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "이력서가 성공적으로 삭제되었습니다.");
+            return ResponseEntity.ok(response);
+        } catch (IllegalArgumentException e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "삭제할 이력서가 없습니다.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
     }
 } 
