@@ -35,7 +35,7 @@ public class BookmarkServiceImpl implements BookmarkService {
                 .orElseThrow(() -> new BookmarkException("채용 공고를 찾을 수 없습니다."));
 
         if (bookmarkRepository.existsByUserAndJobPost(user, jobPost)) {
-            throw new BookmarkException("이미 북마크한 채용 공고입니다.");
+            throw new BookmarkException("이미 찜한 채용 공고입니다.");
         }
 
         Bookmark bookmark = Bookmark.builder()
@@ -54,10 +54,10 @@ public class BookmarkServiceImpl implements BookmarkService {
                 .orElseThrow(() -> new BookmarkException("사용자를 찾을 수 없습니다."));
 
         Bookmark bookmark = bookmarkRepository.findById(bookmarkId)
-                .orElseThrow(() -> new BookmarkException("북마크를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BookmarkException("찜한 공고를 찾을 수 없습니다."));
 
         if (!bookmark.getUser().equals(user)) {
-            throw new BookmarkException("다른 사용자의 북마크는 삭제할 수 없습니다.");
+            throw new BookmarkException("다른 사용자의 찜한 공고는 삭제할 수 없습니다.");
         }
 
         bookmarkRepository.delete(bookmark);
