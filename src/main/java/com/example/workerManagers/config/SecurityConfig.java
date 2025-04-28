@@ -37,7 +37,8 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/users/signup", "/users/login", "/users/logout", "/users/logout-test",
                     "/job-posts/**", "/companies/**", "/job-codes/**", "/industrial-accidents/**", "/predict/**", "/ai-matchings/**", "/resumes/**", "/applications/**",
-                    "/bookmarks/**", "/talentbookmarks/**").permitAll()
+                    "/bookmarks/**", "/talentbookmarks/**", "/ws-chat/**").permitAll()
+                .requestMatchers("/chat/**").authenticated()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(tokenProvider, tokenBlacklist), UsernamePasswordAuthenticationFilter.class);
@@ -53,9 +54,22 @@ public class SecurityConfig {
             "http://localhost:3000",
             "https://web-workekmanagers-fe-m9i2iiuc1e546d59.sel4.cloudtype.app"
         ));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "X-Requested-With"));
-        configuration.setExposedHeaders(Arrays.asList("Authorization", "x-access-token"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"));
+        configuration.setAllowedHeaders(Arrays.asList(
+            "Authorization", 
+            "Content-Type", 
+            "X-Requested-With",
+            "Accept",
+            "Origin",
+            "Access-Control-Request-Method",
+            "Access-Control-Request-Headers"
+        ));
+        configuration.setExposedHeaders(Arrays.asList(
+            "Authorization", 
+            "x-access-token",
+            "Access-Control-Allow-Origin",
+            "Access-Control-Allow-Credentials"
+        ));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
 
