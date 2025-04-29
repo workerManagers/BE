@@ -12,6 +12,8 @@ import com.example.workerManagers.domain.users.exception.UserException;
 import com.example.workerManagers.domain.users.repository.UserRepository;
 import com.example.workerManagers.global.security.JwtTokenProvider;
 import com.example.workerManagers.global.security.TokenBlacklist;
+import com.example.workerManagers.domain.auth.entity.RefreshToken;
+import com.example.workerManagers.domain.auth.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,6 +27,8 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.time.Instant;
+import java.util.Date;
 import java.util.HashSet;
 
 @Slf4j
@@ -38,6 +42,7 @@ public class UserServiceImpl implements UserService {
     private final JwtTokenProvider tokenProvider;
     private final PasswordEncoder passwordEncoder;
     private final TokenBlacklist tokenBlacklist;
+    private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
     @Transactional
@@ -102,6 +107,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public LoginResponseDto login(LoginRequestDto requestDto) {
         log.info("로그인 시도: {}", requestDto.getUserEmail());
         try {
@@ -123,18 +129,49 @@ public class UserServiceImpl implements UserService {
                 throw new UserException("이메일 또는 비밀번호가 일치하지 않습니다.");
             }
             
-            // JWT 토큰 생성
-            String token = tokenProvider.createToken(requestDto.getUserEmail(), user.getUserType());
+            // Access Token 생성
+            log.info("액세스 토큰 생성 시작");
+            String accessToken = tokenProvider.createAccessToken(requestDto.getUserEmail(), user.getUserType());
+            log.info("액세스 토큰 생성 완료: {}", accessToken);
+            
+            // Refresh Token 생성
+            log.info("리프레시 토큰 생성 시작");
+            Date now = new Date();
+            Date refreshTokenExpiry = new Date(now.getTime() + (14 * 24 * 60 * 60 * 1000)); // 14일
+            String refreshToken = tokenProvider.createRefreshToken(requestDto.getUserEmail(), user.getUserType());
+            log.info("리프레시 토큰 생성 완료: {}", refreshToken);
+
+            // 기존 Refresh Token이 있다면 삭제
+            log.info("기존 리프레시 토큰 확인");
+            refreshTokenRepository.findByUserEmail(requestDto.getUserEmail())
+                    .ifPresent(token -> {
+                        log.info("기존 리프레시 토큰 삭제: {}", token.getToken());
+                        refreshTokenRepository.delete(token);
+                    });
+
+            // 새로운 Refresh Token 저장
+            log.info("새로운 리프레시 토큰 저장 시작");
+            RefreshToken refreshTokenEntity = RefreshToken.builder()
+                    .token(refreshToken)
+                    .userEmail(requestDto.getUserEmail())
+                    .expiryDate(refreshTokenExpiry.toInstant())
+                    .build();
+            refreshTokenRepository.save(refreshTokenEntity);
+            log.info("새로운 리프레시 토큰 저장 완료");
             
             log.info("로그인 성공: {}", requestDto.getUserEmail());
             
-            return LoginResponseDto.builder()
-                    .accessToken(token)
+            LoginResponseDto response = LoginResponseDto.builder()
+                    .accessToken(accessToken)
+                    .refreshToken(refreshToken)
                     .tokenType("Bearer")
                     .userId(user.getUserId())
                     .userName(user.getUserName())
                     .userType(user.getUserType())
                     .build();
+            
+            log.info("응답 생성 완료: {}", response);
+            return response;
         } catch (UserException e) {
             throw e;
         } catch (Exception e) {
