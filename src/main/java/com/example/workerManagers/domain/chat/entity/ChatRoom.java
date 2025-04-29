@@ -4,16 +4,20 @@ import com.example.workerManagers.domain.jobpost.entity.JobPost;
 import com.example.workerManagers.domain.users.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "chat_room")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class ChatRoom {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -33,12 +37,21 @@ public class ChatRoom {
 
     private LocalDateTime createdAt;
 
+    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
+    private List<ChatMessage> messages = new ArrayList<>();
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
+
     @Builder
     public ChatRoom(JobPost jobPost, User applicant, User recruiter) {
         this.jobPost = jobPost;
         this.applicant = applicant;
         this.recruiter = recruiter;
         this.createdAt = LocalDateTime.now();
+        this.messages = new ArrayList<>();
     }
 
     public void setApplicant(User applicant) {
