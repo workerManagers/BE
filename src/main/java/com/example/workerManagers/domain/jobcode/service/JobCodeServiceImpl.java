@@ -23,6 +23,11 @@ public class JobCodeServiceImpl implements JobCodeService {
     @Override
     @Transactional
     public JobCodeResponseDto createJobCode(JobCodeRequestDto requestDto) {
+        // 중복 체크
+        if (jobCodeRepository.findByJobName(requestDto.getJobName()).isPresent()) {
+            throw new JobCodeException("이미 존재하는 직종명입니다: " + requestDto.getJobName());
+        }
+
         JobCode jobCode = JobCode.builder()
                 .jobName(requestDto.getJobName())
                 .industryCategory(requestDto.getIndustryCategory())

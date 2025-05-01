@@ -21,7 +21,7 @@ public class JobCode {
     @Column(name = "job_code_id")
     private Long jobCodeId;
 
-    @Column(length = 20, nullable = false)
+    @Column(length = 20, nullable = false, unique = true)
     private String jobName;
 
     @Enumerated(EnumType.STRING)
