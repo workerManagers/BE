@@ -249,4 +249,84 @@ public class UserServiceImpl implements UserService {
         log.info("사용자 정보 조회 완료: {}", userEmail);
         return responseDto;
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponseDto getUserByName(String userName) {
+        log.info("사용자 이름으로 정보 조회 시작: {}", userName);
+        
+        User user = userRepository.findByUserName(userName)
+                .orElseThrow(() -> {
+                    log.error("존재하지 않는 사용자 이름: {}", userName);
+                    return new UserException("해당 이름의 사용자를 찾을 수 없습니다.");
+                });
+
+        UserResponseDto.UserResponseDtoBuilder builder = UserResponseDto.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .userEmail(user.getUserEmail())
+                .userSex(user.getUserSex())
+                .userAge(user.getUserAge())
+                .userType(user.getUserType());
+
+        // 기업 회원인 경우 기업 정보도 포함
+        if (user.getUserType() == User.UserType.COMPANY) {
+            Company company = companyRepository.findByUser(user)
+                    .orElse(null);
+            
+            if (company != null) {
+                UserResponseDto.CompanyInfo companyInfo = UserResponseDto.CompanyInfo.builder()
+                        .companyName(company.getCompanyName())
+                        .companyRegion(company.getCompanyRegion())
+                        .companyCode(company.getCompanyCode())
+                        .build();
+                
+                builder.companyInfo(companyInfo);
+            }
+        }
+
+        UserResponseDto responseDto = builder.build();
+        log.info("사용자 이름으로 정보 조회 완료: {}", userName);
+        return responseDto;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserResponseDto getUserById(Long userId) {
+        log.info("사용자 ID로 정보 조회 시작: {}", userId);
+        
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> {
+                    log.error("존재하지 않는 사용자 ID: {}", userId);
+                    return new UserException("해당 ID의 사용자를 찾을 수 없습니다.");
+                });
+
+        UserResponseDto.UserResponseDtoBuilder builder = UserResponseDto.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .userEmail(user.getUserEmail())
+                .userSex(user.getUserSex())
+                .userAge(user.getUserAge())
+                .userType(user.getUserType());
+
+        // 기업 회원인 경우 기업 정보도 포함
+        if (user.getUserType() == User.UserType.COMPANY) {
+            Company company = companyRepository.findByUser(user)
+                    .orElse(null);
+            
+            if (company != null) {
+                UserResponseDto.CompanyInfo companyInfo = UserResponseDto.CompanyInfo.builder()
+                        .companyName(company.getCompanyName())
+                        .companyRegion(company.getCompanyRegion())
+                        .companyCode(company.getCompanyCode())
+                        .build();
+                
+                builder.companyInfo(companyInfo);
+            }
+        }
+
+        UserResponseDto responseDto = builder.build();
+        log.info("사용자 ID로 정보 조회 완료: {}", userId);
+        return responseDto;
+    }
 } 

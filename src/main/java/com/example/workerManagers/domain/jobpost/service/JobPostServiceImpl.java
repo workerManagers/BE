@@ -52,22 +52,7 @@ public class JobPostServiceImpl implements JobPostService {
                 .build();
 
         JobPost savedJobPost = jobPostRepository.save(jobPost);
-
-        return JobPostResponseDto.builder()
-                .jobPostId(savedJobPost.getJobPostId())
-                .companyName(savedJobPost.getCompany().getCompanyName())
-                .jobName(savedJobPost.getJobCode().getJobName())
-                .jobPostDescription(savedJobPost.getJobPostDescription())
-                .mainTasks(savedJobPost.getMainTasks())
-                .qualifications(savedJobPost.getQualifications())
-                .preferredQualifications(savedJobPost.getPreferredQualifications())
-                .idealCandidate(savedJobPost.getIdealCandidate())
-                .jobPeriod(savedJobPost.getJobPeriod())
-                .jobRegion(savedJobPost.getJobRegion())
-                .deadline(savedJobPost.getDeadline())
-                .careerType(savedJobPost.getCareerType())
-                .message("채용 공고가 성공적으로 생성되었습니다.")
-                .build();
+        return JobPostResponseDto.of(savedJobPost, "채용 공고가 성공적으로 생성되었습니다.");
     }
 
     @Override
@@ -96,21 +81,7 @@ public class JobPostServiceImpl implements JobPostService {
                 requestDto.getQualifications(), requestDto.getPreferredQualifications(),
                 requestDto.getIdealCandidate(), requestDto.getJobRegion());
 
-        return JobPostResponseDto.builder()
-                .jobPostId(jobPost.getJobPostId())
-                .companyName(jobPost.getCompany().getCompanyName())
-                .jobName(jobPost.getJobCode().getJobName())
-                .jobPostDescription(jobPost.getJobPostDescription())
-                .mainTasks(jobPost.getMainTasks())
-                .qualifications(jobPost.getQualifications())
-                .preferredQualifications(jobPost.getPreferredQualifications())
-                .idealCandidate(jobPost.getIdealCandidate())
-                .jobPeriod(jobPost.getJobPeriod())
-                .jobRegion(jobPost.getJobRegion())
-                .deadline(jobPost.getDeadline())
-                .careerType(jobPost.getCareerType())
-                .message("채용 공고가 성공적으로 수정되었습니다.")
-                .build();
+        return JobPostResponseDto.of(jobPost, "채용 공고가 성공적으로 수정되었습니다.");
     }
 
     @Override

@@ -34,11 +34,6 @@ public class ChatController {
         return ResponseEntity.ok(chatService.getMyChatRooms(authentication.getName()));
     }
 
-    @GetMapping("/rooms/recruiter")
-    public ResponseEntity<List<ChatRoomDto>> getRecruiterChatRooms(Authentication authentication) {
-        return ResponseEntity.ok(chatService.getRecruiterChatRooms(authentication.getName()));
-    }
-
     @GetMapping("/rooms/{roomId}/messages")
     public ResponseEntity<?> getChatMessages(
             @PathVariable(required = false) Long roomId,

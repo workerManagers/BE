@@ -1,6 +1,5 @@
 package com.example.workerManagers.domain.chat.entity;
 
-import com.example.workerManagers.domain.jobpost.entity.JobPost;
 import com.example.workerManagers.domain.users.entity.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -24,16 +23,12 @@ public class ChatRoom {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "job_post_id")
-    private JobPost jobPost;
+    @JoinColumn(name = "user1_id")
+    private User user1;  // 채팅방 생성자
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "applicant_id")
-    private User applicant;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "recruiter_id")
-    private User recruiter;
+    @JoinColumn(name = "user2_id")
+    private User user2;  // 채팅 상대방
 
     private LocalDateTime createdAt;
 
@@ -46,19 +41,22 @@ public class ChatRoom {
     }
 
     @Builder
-    public ChatRoom(JobPost jobPost, User applicant, User recruiter) {
-        this.jobPost = jobPost;
-        this.applicant = applicant;
-        this.recruiter = recruiter;
+    public ChatRoom(User user1, User user2) {
+        this.user1 = user1;
+        this.user2 = user2;
         this.createdAt = LocalDateTime.now();
         this.messages = new ArrayList<>();
     }
 
-    public void setApplicant(User applicant) {
-        this.applicant = applicant;
+    public void setUser1(User user1) {
+        this.user1 = user1;
     }
 
-    public void setRecruiter(User recruiter) {
-        this.recruiter = recruiter;
+    public void setUser2(User user2) {
+        this.user2 = user2;
+    }
+
+    public boolean isParticipant(User user) {
+        return user.equals(user1) || user.equals(user2);
     }
 } 

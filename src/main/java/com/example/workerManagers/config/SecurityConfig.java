@@ -35,7 +35,7 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/users/signup", "/users/login", "/users/logout", "/users/logout-test",
+                .requestMatchers("/users/signup", "/users/login", "/users/logout", "/users/logout-test", "users/name",
                     "/job-posts/**", "/companies/**", "/job-codes/**", "/industrial-accidents/**", "/predict/**", "/ai-matchings/**", "/resumes/**", "/applications/**",
                     "/bookmarks/**", "/talentbookmarks/**", "/ws-chat/**", "/auth/refresh", "/auth/extend").permitAll()
                 .requestMatchers("/chat/**").authenticated()

@@ -129,4 +129,18 @@ public class UserController {
         log.info("사용자 정보 조회 완료: {}", userEmail);
         return ResponseEntity.ok(responseDto);
     }
+
+    @GetMapping("/name/{userName}")
+    public ResponseEntity<UserResponseDto> getUserByName(@PathVariable String userName) {
+        log.info("사용자 이름으로 조회 요청: {}", userName);
+        UserResponseDto userResponseDto = userService.getUserByName(userName);
+        return ResponseEntity.ok(userResponseDto);
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserResponseDto> getUserById(@PathVariable Long userId) {
+        log.info("사용자 ID로 조회 요청: {}", userId);
+        UserResponseDto userResponseDto = userService.getUserById(userId);
+        return ResponseEntity.ok(userResponseDto);
+    }
 } 

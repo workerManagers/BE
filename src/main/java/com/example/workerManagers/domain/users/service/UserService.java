@@ -11,4 +11,6 @@ public interface UserService {
     LoginResponseDto login(LoginRequestDto requestDto);
     void logout(String token);
     UserResponseDto getUserInfo(String userEmail);
+    UserResponseDto getUserByName(String userName);
+    UserResponseDto getUserById(Long userId);
 } 

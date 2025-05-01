@@ -15,6 +15,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class JobPostResponseDto {
     private Long jobPostId;
+    private Long authorId;
+    private String authorName;
+    private String authorEmail;
     private String companyName;
     private String jobName;
     private String jobPostDescription;
@@ -31,6 +34,9 @@ public class JobPostResponseDto {
     public static JobPostResponseDto of(JobPost jobPost, String message) {
         return JobPostResponseDto.builder()
                 .jobPostId(jobPost.getJobPostId())
+                .authorId(jobPost.getCompany().getUser().getUserId())
+                .authorName(jobPost.getCompany().getUser().getUserName())
+                .authorEmail(jobPost.getCompany().getUser().getUserEmail())
                 .companyName(jobPost.getCompany().getCompanyName())
                 .jobName(jobPost.getJobCode().getJobName())
                 .jobPostDescription(jobPost.getJobPostDescription())
@@ -45,4 +51,4 @@ public class JobPostResponseDto {
                 .message(message)
                 .build();
     }
-} 
+}
