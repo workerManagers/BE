@@ -37,7 +37,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/users/signup", "/users/login", "/users/logout", "/users/logout-test",
                     "/job-posts/**", "/companies/**", "/job-codes/**", "/industrial-accidents/**", "/predict/**", "/ai-matchings/**", "/resumes/**", "/applications/**",
-                    "/bookmarks/**", "/talentbookmarks/**", "/ws-chat/**").permitAll()
+                    "/bookmarks/**", "/talentbookmarks/**", "/ws-chat/**", "/auth/refresh", "/auth/extend").permitAll()
                 .requestMatchers("/chat/**").authenticated()
                 .anyRequest().authenticated()
             )

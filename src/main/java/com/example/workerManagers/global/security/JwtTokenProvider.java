@@ -23,35 +23,60 @@ public class JwtTokenProvider {
 
     private final Key key;
     private final UserDetailsService userDetailsService;
-    private final long tokenValidityInMilliseconds;
+    private final long accessTokenValidityInMilliseconds;
+    private final long refreshTokenValidityInMilliseconds;
     private final TokenBlacklist tokenBlacklist;
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
 
     public JwtTokenProvider(
-            @Value("${jwt.secret:your-secret-key}") String secret,
-            @Value("${jwt.token-validity-in-seconds:3600}") long tokenValidityInSeconds,
+            @Value("${jwt.secret}") String secret,
+            @Value("${jwt.access-token-validity-in-seconds}") long tokenValidityInSeconds,
+            @Value("${jwt.refresh-token-validity-in-seconds}") long refreshTokenValidityInSeconds,
             UserDetailsService userDetailsService,
             TokenBlacklist tokenBlacklist) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
-        this.tokenValidityInMilliseconds = tokenValidityInSeconds * 1000;
+        this.accessTokenValidityInMilliseconds = tokenValidityInSeconds * 1000;
+        this.refreshTokenValidityInMilliseconds = refreshTokenValidityInSeconds * 1000;
         this.userDetailsService = userDetailsService;
         this.tokenBlacklist = tokenBlacklist;
     }
 
-    public String createToken(String email, User.UserType userType) {
-        logger.info("토큰 생성 시작: {}, userType: {}", email, userType);
+    public String createAccessToken(String email, User.UserType userType) {
+        logger.info("액세스 토큰 생성 시작: {}, userType: {}", email, userType);
         Date now = new Date();
-        Date validity = new Date(now.getTime() + tokenValidityInMilliseconds);
+        Date validity = new Date(now.getTime() + accessTokenValidityInMilliseconds);
+        logger.info("액세스 토큰 유효 기간: {} ~ {}", now, validity);
 
         String token = Jwts.builder()
                 .setSubject(email)
                 .claim("userType", userType.name())
+                .claim("tokenType", "ACCESS")
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .signWith(key)
                 .compact();
         
-        logger.info("토큰 생성 완료: {}", email);
+        logger.info("액세스 토큰 생성 완료: {}", token);
+        return token;
+    }
+
+    public String createRefreshToken(String email, User.UserType userType) {
+        logger.info("리프레시 토큰 생성 시작: {}, userType: {}", email, userType);
+        Date now = new Date();
+        // 2주를 밀리초로 변환 (14일 * 24시간 * 60분 * 60초 * 1000밀리초)
+        Date validity = new Date(now.getTime() + (14 * 24 * 60 * 60 * 1000L));
+        logger.info("리프레시 토큰 유효 기간: {} ~ {}", now, validity);
+
+        String token = Jwts.builder()
+                .setSubject(email)
+                .claim("userType", userType.name())
+                .claim("tokenType", "REFRESH")
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .signWith(key)
+                .compact();
+        
+        logger.info("리프레시 토큰 생성 완료: {}", token);
         return token;
     }
 
@@ -128,5 +153,14 @@ public class JwtTokenProvider {
             logger.error("토큰에서 사용자 타입 추출 실패: {}", e.getMessage());
             throw new RuntimeException("토큰에서 사용자 타입을 추출할 수 없습니다.", e);
         }
+    }
+
+    public Date getExpirationDateFromToken(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
     }
 }

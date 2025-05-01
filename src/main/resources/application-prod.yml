@@ -17,8 +17,8 @@ spring:
 # ================ JWT 설정 ================
 jwt:
   secret: ${JWT_SECRET}
-  token-validity-in-seconds: ${JWT_TOKEN_VALIDITY_IN_SECONDS}
-
+  access-token-validity-in-seconds: ${JWT_ACCESS_TOKEN_VALIDITY_IN_SECONDS}
+  refresh-token-validity-in-seconds: ${JWT_REFRESH_TOKEN_VALIDITY_IN_SECONDS}
 # ================ 로깅 설정 ================
 logging:
   level:
@@ -35,3 +35,4 @@ logging:
 fastapi:
   server:
     url: https://port-0-workermanagers-ai-m9i2iiuc1e546d59.sel4.cloudtype.app  # FastAPI 서버 주소
+

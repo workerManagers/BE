@@ -7,6 +7,7 @@ import com.example.workerManagers.domain.jobpost.exception.JobPostException;
 import com.example.workerManagers.domain.resume.exception.ResumeException;
 import com.example.workerManagers.domain.talentbookmark.exception.TalentBookmarkException;
 import com.example.workerManagers.domain.bookmark.exception.BookmarkException;
+import com.example.workerManagers.domain.auth.exception.TokenException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -31,6 +32,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(com.example.workerManagers.domain.users.exception.UserException.class)
     public ResponseEntity<Map<String, String>> handleUserException(com.example.workerManagers.domain.users.exception.UserException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getMessage());
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    @ExceptionHandler(TokenException.class)
+    public ResponseEntity<Map<String, String>> handleTokenException(TokenException ex) {
         Map<String, String> error = new HashMap<>();
         error.put("error", ex.getMessage());
         return ResponseEntity.badRequest().body(error);
