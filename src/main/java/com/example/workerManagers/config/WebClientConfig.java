@@ -22,11 +22,11 @@ public class WebClientConfig {
     @Bean
     public WebClient webClient() {
         HttpClient httpClient = HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 300000) // Connection timeout: 5 minutes
-                .responseTimeout(Duration.ofMinutes(5)) // Response timeout: 5 minutes
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 600000) // Connection timeout: 10 minutes
+                .responseTimeout(Duration.ofMinutes(10)) // Response timeout: 10 minutes
                 .doOnConnected(conn -> 
-                    conn.addHandlerLast(new ReadTimeoutHandler(5, TimeUnit.MINUTES))
-                        .addHandlerLast(new WriteTimeoutHandler(5, TimeUnit.MINUTES))
+                    conn.addHandlerLast(new ReadTimeoutHandler(10, TimeUnit.MINUTES))
+                        .addHandlerLast(new WriteTimeoutHandler(10, TimeUnit.MINUTES))
                 );
 
         return WebClient.builder()
