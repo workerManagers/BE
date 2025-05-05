@@ -13,4 +13,5 @@ public interface UserService {
     UserResponseDto getUserInfo(String userEmail);
     UserResponseDto getUserByName(String userName);
     UserResponseDto getUserById(Long userId);
+    UserResponseDto updateMatchingStatus(String userEmail, Boolean matchingEnabled);
 } 

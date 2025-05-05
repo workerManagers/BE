@@ -17,6 +17,7 @@ public class UserResponseDto {
     private String userSex;
     private Integer userAge;
     private User.UserType userType;
+    private Boolean matchingEnabled;
     private CompanyInfo companyInfo;
 
     @Getter

@@ -6,6 +6,7 @@ import com.example.workerManagers.domain.users.dto.SignupRequestDto;
 import com.example.workerManagers.domain.users.dto.SignupResponseDto;
 import com.example.workerManagers.domain.users.dto.LogoutResponseDto;
 import com.example.workerManagers.domain.users.dto.UserResponseDto;
+import com.example.workerManagers.domain.users.dto.MatchingStatusUpdateDto;
 import com.example.workerManagers.domain.users.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -142,5 +143,20 @@ public class UserController {
         log.info("사용자 ID로 조회 요청: {}", userId);
         UserResponseDto userResponseDto = userService.getUserById(userId);
         return ResponseEntity.ok(userResponseDto);
+    }
+
+    @PutMapping("/matching-status")
+    public ResponseEntity<?> updateMatchingStatus(
+            @RequestBody MatchingStatusUpdateDto requestDto,
+            Authentication authentication) {
+        try {
+            String userEmail = authentication.getName();
+            UserResponseDto responseDto = userService.updateMatchingStatus(userEmail, requestDto.getMatchingEnabled());
+            return ResponseEntity.ok(responseDto);
+        } catch (IllegalArgumentException e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
     }
 } 

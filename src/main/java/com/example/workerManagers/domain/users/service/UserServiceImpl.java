@@ -227,7 +227,8 @@ public class UserServiceImpl implements UserService {
                 .userEmail(user.getUserEmail())
                 .userSex(user.getUserSex())
                 .userAge(user.getUserAge())
-                .userType(user.getUserType());
+                .userType(user.getUserType())
+                .matchingEnabled(user.getMatchingEnabled());
 
         // 기업 회원인 경우 기업 정보도 포함
         if (user.getUserType() == User.UserType.COMPANY) {
@@ -267,7 +268,8 @@ public class UserServiceImpl implements UserService {
                 .userEmail(user.getUserEmail())
                 .userSex(user.getUserSex())
                 .userAge(user.getUserAge())
-                .userType(user.getUserType());
+                .userType(user.getUserType())
+                .matchingEnabled(user.getMatchingEnabled());
 
         // 기업 회원인 경우 기업 정보도 포함
         if (user.getUserType() == User.UserType.COMPANY) {
@@ -307,7 +309,8 @@ public class UserServiceImpl implements UserService {
                 .userEmail(user.getUserEmail())
                 .userSex(user.getUserSex())
                 .userAge(user.getUserAge())
-                .userType(user.getUserType());
+                .userType(user.getUserType())
+                .matchingEnabled(user.getMatchingEnabled());
 
         // 기업 회원인 경우 기업 정보도 포함
         if (user.getUserType() == User.UserType.COMPANY) {
@@ -328,5 +331,24 @@ public class UserServiceImpl implements UserService {
         UserResponseDto responseDto = builder.build();
         log.info("사용자 ID로 정보 조회 완료: {}", userId);
         return responseDto;
+    }
+
+    @Override
+    @Transactional
+    public UserResponseDto updateMatchingStatus(String userEmail, Boolean matchingEnabled) {
+        User user = userRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new UserException("사용자를 찾을 수 없습니다."));
+        
+        user.setMatchingEnabled(matchingEnabled);
+        
+        return UserResponseDto.builder()
+                .userId(user.getUserId())
+                .userName(user.getUserName())
+                .userEmail(user.getUserEmail())
+                .userSex(user.getUserSex())
+                .userAge(user.getUserAge())
+                .userType(user.getUserType())
+                .matchingEnabled(user.getMatchingEnabled())
+                .build();
     }
 } 

@@ -37,6 +37,9 @@ public class User {
     @Column(name = "user_email", nullable = false, unique = true)
     private String userEmail;
 
+    @Column(name = "matching_enabled", nullable = false)
+    private Boolean matchingEnabled = true;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "user_type", nullable = false)
     private UserType userType;

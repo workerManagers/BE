@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -71,6 +72,45 @@ public class ResumeController {
             Map<String, String> response = new HashMap<>();
             response.put("message", "삭제할 이력서가 없습니다.");
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+    }
+
+    @GetMapping("/{resumeId}")
+    public ResponseEntity<?> getResumeById(
+            @PathVariable Long resumeId,
+            Authentication authentication) {
+        String userEmail = authentication.getName();
+        try {
+            ResumeResponseDto responseDto = resumeService.getResumeById(resumeId, userEmail);
+            return ResponseEntity.ok(responseDto);
+        } catch (IllegalArgumentException e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+        }
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<?> getResumeByUserId(@PathVariable Long userId) {
+        try {
+            ResumeResponseDto responseDto = resumeService.getResumeByUserId(userId);
+            return ResponseEntity.ok(responseDto);
+        } catch (IllegalArgumentException e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+        }
+    }
+
+    @GetMapping("/matching-enabled")
+    public ResponseEntity<?> getAllMatchingEnabledResumes() {
+        try {
+            List<ResumeResponseDto> resumes = resumeService.getAllMatchingEnabledResumes();
+            return ResponseEntity.ok(resumes);
+        } catch (Exception e) {
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "매칭 희망자의 이력서를 조회하는 중 오류가 발생했습니다.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
 } 

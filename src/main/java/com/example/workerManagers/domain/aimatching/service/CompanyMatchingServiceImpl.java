@@ -40,15 +40,12 @@ public class CompanyMatchingServiceImpl implements CompanyMatchingService {
         JobPost jobPost = jobPostRepository.findById(requestDto.getJobPostId())
                 .orElseThrow(() -> new IllegalArgumentException("Job post not found"));
 
-        // 채용 공고에 지원한 모든 지원서 가져오기
-        List<Application> applications = applicationRepository.findByJobPost(jobPost);
+        // 매칭이 허용된 모든 이력서 가져오기
+        List<Resume> matchingEnabledResumes = resumeRepository.findAllByMatchingEnabled();
 
-        // 각 지원서의 이력서와 매칭 점수 계산
-        return applications.stream()
-                .map(application -> {
-                    Resume resume = resumeRepository.findByUser(application.getUser())
-                            .orElseThrow(() -> new IllegalArgumentException("Resume not found"));
-                    
+        // 각 이력서와 매칭 점수 계산
+        return matchingEnabledResumes.stream()
+                .map(resume -> {
                     Double matchingScore = getMatchingScore(
                         createJobPostText(jobPost),
                         resume.getResumeText()

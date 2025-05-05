@@ -10,6 +10,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -84,5 +87,49 @@ public class ResumeServiceImpl implements ResumeService {
                 .orElseThrow(() -> new IllegalArgumentException("Resume not found"));
 
         resumeRepository.delete(resume);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ResumeResponseDto getResumeById(Long resumeId, String userEmail) {
+        User user = userRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Resume resume = resumeRepository.findById(resumeId)
+                .orElseThrow(() -> new IllegalArgumentException("Resume not found"));
+
+        return ResumeResponseDto.builder()
+                .resumeId(resume.getResumeId())
+                .resumeText(resume.getResumeText())
+                .userName(resume.getUser().getUserName())
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ResumeResponseDto getResumeByUserId(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("사용자를 찾을 수 없습니다."));
+
+        Resume resume = resumeRepository.findByUser(user)
+                .orElseThrow(() -> new IllegalArgumentException("이력서를 찾을 수 없습니다."));
+
+        return ResumeResponseDto.builder()
+                .resumeId(resume.getResumeId())
+                .resumeText(resume.getResumeText())
+                .userName(resume.getUser().getUserName())
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ResumeResponseDto> getAllMatchingEnabledResumes() {
+        return resumeRepository.findAllByMatchingEnabled().stream()
+                .map(resume -> ResumeResponseDto.builder()
+                        .resumeId(resume.getResumeId())
+                        .resumeText(resume.getResumeText())
+                        .userName(resume.getUser().getUserName())
+                        .build())
+                .collect(Collectors.toList());
     }
 } 

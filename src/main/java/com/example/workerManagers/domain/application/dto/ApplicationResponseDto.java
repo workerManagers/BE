@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @Builder
 public class ApplicationResponseDto {
     private Long applicationId;
+    private Long userId;
     private String userName;
     private Long jobPostId;
     private String companyName;
@@ -19,6 +20,7 @@ public class ApplicationResponseDto {
     public static ApplicationResponseDto from(Application application) {
         return ApplicationResponseDto.builder()
                 .applicationId(application.getApplicationId())
+                .userId(application.getUser().getUserId())
                 .userName(application.getUser().getUserName())
                 .jobPostId(application.getJobPost().getJobPostId())
                 .companyName(application.getJobPost().getCompany().getCompanyName())
