@@ -1,6 +1,6 @@
 spring:
   config:
-    import: 
+    import:
       - optional:file:.env[.properties]
       - optional:file:application-${spring.profiles.active}.yml
   profiles:
@@ -9,3 +9,11 @@ spring:
 fastapi:
   server:
     url: https://port-0-workermanagers-ai-m9i2iiuc1e546d59.sel4.cloudtype.app  # FastAPI 서버 주소
+
+server:
+  # 서버 연결 타임아웃 (예: 30분)
+  connection-timeout: 30m
+
+  servlet:
+    session:
+      timeout: 30m   # 세션 타임아웃 (예: 30분)
