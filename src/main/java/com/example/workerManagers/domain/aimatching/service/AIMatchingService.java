@@ -4,8 +4,9 @@ import com.example.workerManagers.domain.aimatching.dto.AIMatchingRequestDto;
 import com.example.workerManagers.domain.aimatching.dto.AIMatchingResponseDto;
 import com.example.workerManagers.domain.aimatching.dto.JobPostMatchingDto;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface AIMatchingService {
-    List<JobPostMatchingDto> getMatchingScoresForAllJobPosts(String resumeText);
-    List<AIMatchingResponseDto> getMatchingScores(AIMatchingRequestDto requestDto);
+    CompletableFuture<List<JobPostMatchingDto>> getMatchingScoresForAllJobPosts(String resumeText);
+    CompletableFuture<List<AIMatchingResponseDto>> getMatchingScores(AIMatchingRequestDto requestDto);
 } 

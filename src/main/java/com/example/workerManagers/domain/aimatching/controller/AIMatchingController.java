@@ -24,4 +24,11 @@ public class AIMatchingController {
         return aiMatchingService.getMatchingScores(requestDto)
                 .thenApply(ResponseEntity::ok);
     }
+
+    @PostMapping("/match/all")
+    public CompletableFuture<ResponseEntity<List<JobPostMatchingDto>>> getMatchingScoresForAllJobPosts(
+            @RequestBody String resumeText) {
+        return aiMatchingService.getMatchingScoresForAllJobPosts(resumeText)
+                .thenApply(ResponseEntity::ok);
+    }
 } 

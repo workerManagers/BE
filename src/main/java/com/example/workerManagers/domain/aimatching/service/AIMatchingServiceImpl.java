@@ -33,10 +33,11 @@ public class AIMatchingServiceImpl implements AIMatchingService {
     private final WebClient webClient;
 
     @Override
-    public List<JobPostMatchingDto> getMatchingScoresForAllJobPosts(String resumeText) {
+    public CompletableFuture<List<JobPostMatchingDto>> getMatchingScoresForAllJobPosts(String resumeText) {
         List<JobPost> jobPosts = jobPostRepository.findAll();
-        return jobPosts.stream()
-                .map(jobPost -> {
+        
+        List<CompletableFuture<JobPostMatchingDto>> futures = jobPosts.stream()
+                .map(jobPost -> CompletableFuture.supplyAsync(() -> {
                     Double matchingScore = getMatchingScore(
                         createJobPostText(jobPost),
                         resumeText
@@ -48,9 +49,14 @@ public class AIMatchingServiceImpl implements AIMatchingService {
                             .jobPostDescription(jobPost.getJobPostDescription())
                             .matchingScore(matchingScore)
                             .build();
-                })
-                .sorted((a, b) -> b.getMatchingScore().compareTo(a.getMatchingScore()))
+                }))
                 .collect(Collectors.toList());
+
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenApply(v -> futures.stream()
+                        .map(CompletableFuture::join)
+                        .sorted((a, b) -> b.getMatchingScore().compareTo(a.getMatchingScore()))
+                        .collect(Collectors.toList()));
     }
 
     @Override
