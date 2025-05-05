@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,7 +19,9 @@ public class AIMatchingController {
     private final AIMatchingService aiMatchingService;
 
     @PostMapping("/match")
-    public ResponseEntity<List<AIMatchingResponseDto>> getMatchingScores(@RequestBody AIMatchingRequestDto requestDto) {
-        return ResponseEntity.ok(aiMatchingService.getMatchingScores(requestDto));
+    public CompletableFuture<ResponseEntity<List<AIMatchingResponseDto>>> getMatchingScores(
+            @RequestBody AIMatchingRequestDto requestDto) {
+        return aiMatchingService.getMatchingScores(requestDto)
+                .thenApply(ResponseEntity::ok);
     }
 } 

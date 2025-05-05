@@ -16,9 +16,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -52,7 +54,7 @@ public class AIMatchingServiceImpl implements AIMatchingService {
     }
 
     @Override
-    public List<AIMatchingResponseDto> getMatchingScores(AIMatchingRequestDto requestDto) {
+    public CompletableFuture<List<AIMatchingResponseDto>> getMatchingScores(AIMatchingRequestDto requestDto) {
         // 이력서 조회
         Resume resume = resumeRepository.findById(requestDto.getResumeId())
                 .orElseThrow(() -> new IllegalArgumentException("Resume not found"));
@@ -60,8 +62,9 @@ public class AIMatchingServiceImpl implements AIMatchingService {
         // 모든 채용 공고 조회
         List<JobPost> jobPosts = jobPostRepository.findAll();
 
-        return jobPosts.stream()
-                .map(jobPost -> {
+        // 비동기로 매칭 점수 계산
+        List<CompletableFuture<AIMatchingResponseDto>> futures = jobPosts.stream()
+                .map(jobPost -> CompletableFuture.supplyAsync(() -> {
                     Double matchingScore = getMatchingScore(
                         createJobPostText(jobPost),
                         resume.getResumeText()
@@ -73,9 +76,15 @@ public class AIMatchingServiceImpl implements AIMatchingService {
                             .jobName(jobPost.getJobCode().getJobName())
                             .matchingScore(matchingScore)
                             .build();
-                })
-                .sorted((a, b) -> Double.compare(b.getMatchingScore(), a.getMatchingScore()))
+                }))
                 .collect(Collectors.toList());
+
+        // 모든 비동기 작업 완료 대기
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenApply(v -> futures.stream()
+                        .map(CompletableFuture::join)
+                        .sorted((a, b) -> Double.compare(b.getMatchingScore(), a.getMatchingScore()))
+                        .collect(Collectors.toList()));
     }
 
     private String createJobPostText(JobPost jobPost) {
@@ -100,29 +109,31 @@ public class AIMatchingServiceImpl implements AIMatchingService {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(createFastApiRequest(jobPostText, resumeText))
                 .retrieve()
-                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), response -> {
-                    return response.bodyToMono(String.class)
-                            .flatMap(errorBody -> Mono.error(new RuntimeException(
-                                    "FastAPI 서버 에러: " + errorBody)));
-                })
+                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
+                        response -> response.bodyToMono(String.class)
+                                .flatMap(errorBody -> Mono.error(new RuntimeException(
+                                        "FastAPI 서버 에러: " + errorBody))))
                 .bodyToMono(String.class)
-                .map(response -> {
-                    try {
-                        ObjectMapper mapper = new ObjectMapper();
-                        JsonNode root = mapper.readTree(response);
-                        if (root.isArray() && root.size() > 0) {
-                            JsonNode firstItem = root.get(0);
-                            if (firstItem.has("similarity")) {
-                                String similarityStr = firstItem.get("similarity").asText();
-                                return Double.parseDouble(similarityStr.replace("점", ""));
-                            }
-                        }
-                        throw new RuntimeException("Invalid response format: " + response);
-                    } catch (Exception e) {
-                        throw new RuntimeException("Failed to parse FastAPI response: " + e.getMessage());
-                    }
-                })
+                .map(this::parseMatchingResponse)
+                .subscribeOn(Schedulers.boundedElastic())
                 .block();
+    }
+
+    private Double parseMatchingResponse(String response) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(response);
+            if (root.isArray() && root.size() > 0) {
+                JsonNode firstItem = root.get(0);
+                if (firstItem.has("similarity")) {
+                    String similarityStr = firstItem.get("similarity").asText();
+                    return Double.parseDouble(similarityStr.replace("점", ""));
+                }
+            }
+            throw new RuntimeException("Invalid response format: " + response);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse FastAPI response: " + e.getMessage());
+        }
     }
 
     private Object createFastApiRequest(String jobPostText, String resumeText) {
@@ -130,7 +141,7 @@ public class AIMatchingServiceImpl implements AIMatchingService {
             public final String input_text = jobPostText;
             public final List<Object> dataset = List.of(
                 new Object() {
-                    public final Long resume_id = 1L; // 임시 ID
+                    public final Long resume_id = 1L;
                     public final String resume_description = resumeText;
                 }
             );
