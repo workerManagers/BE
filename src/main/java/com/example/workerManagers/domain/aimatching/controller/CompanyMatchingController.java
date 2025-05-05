@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequiredArgsConstructor
@@ -17,8 +18,9 @@ public class CompanyMatchingController {
     private final CompanyMatchingService companyMatchingService;
 
     @PostMapping("/match")
-    public ResponseEntity<List<CompanyMatchingResponseDto>> getMatchingScoresForResumes(
+    public CompletableFuture<ResponseEntity<List<CompanyMatchingResponseDto>>> getMatchingScoresForResumes(
             @RequestBody CompanyMatchingRequestDto requestDto) {
-        return ResponseEntity.ok(companyMatchingService.getMatchingScoresForResumes(requestDto));
+        return companyMatchingService.getMatchingScoresForResumes(requestDto)
+                .thenApply(ResponseEntity::ok);
     }
 } 

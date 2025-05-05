@@ -9,6 +9,7 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import reactor.netty.http.client.HttpClient;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
@@ -18,6 +19,11 @@ public class WebClientConfig {
 
     @Value("${fastapi.server.url}")
     private String fastApiServerUrl;
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
+    }
 
     @Bean
     public WebClient webClient() {

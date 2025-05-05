@@ -4,7 +4,8 @@ import com.example.workerManagers.domain.aimatching.dto.CompanyMatchingRequestDt
 import com.example.workerManagers.domain.aimatching.dto.CompanyMatchingResponseDto;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public interface CompanyMatchingService {
-    List<CompanyMatchingResponseDto> getMatchingScoresForResumes(CompanyMatchingRequestDto requestDto);
+    CompletableFuture<List<CompanyMatchingResponseDto>> getMatchingScoresForResumes(CompanyMatchingRequestDto requestDto);
 } 

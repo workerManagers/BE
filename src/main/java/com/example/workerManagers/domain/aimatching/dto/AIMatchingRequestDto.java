@@ -1,5 +1,6 @@
 package com.example.workerManagers.domain.aimatching.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -13,8 +14,10 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AIMatchingRequestDto {
     private Long resumeId;
+    private Long jobPostId;
     private List<JobPostData> dataset;
 
     @Getter
@@ -22,8 +25,9 @@ public class AIMatchingRequestDto {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class JobPostData {
-        private Long jobPost_id;
-        private String jobPost_description;
+        private Long jobPostId;
+        private String jobPostDescription;
     }
 } 

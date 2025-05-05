@@ -17,8 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.util.retry.Retry;
 
+import java.time.Duration;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,36 +33,46 @@ public class CompanyMatchingServiceImpl implements CompanyMatchingService {
     private final ApplicationRepository applicationRepository;
     private final ResumeRepository resumeRepository;
     private final WebClient webClient;
+    private final ObjectMapper objectMapper;
 
     @Value("${fastapi.url:https://port-0-workermanagers-ai-m9i2iiuc1e546d59.sel4.cloudtype.app}")
     private String fastApiUrl;
 
     @Override
-    public List<CompanyMatchingResponseDto> getMatchingScoresForResumes(CompanyMatchingRequestDto requestDto) {
-        // 채용 공고 정보 가져오기
-        JobPost jobPost = jobPostRepository.findById(requestDto.getJobPostId())
-                .orElseThrow(() -> new IllegalArgumentException("Job post not found"));
+    public CompletableFuture<List<CompanyMatchingResponseDto>> getMatchingScoresForResumes(CompanyMatchingRequestDto requestDto) {
+        return CompletableFuture.supplyAsync(() -> {
+            // 채용 공고 정보 가져오기
+            JobPost jobPost = jobPostRepository.findById(requestDto.getJobPostId())
+                    .orElseThrow(() -> new IllegalArgumentException("Job post not found"));
 
-        // 매칭이 허용된 모든 이력서 가져오기
-        List<Resume> matchingEnabledResumes = resumeRepository.findAllByMatchingEnabled();
+            // 매칭이 허용된 모든 이력서 가져오기
+            List<Resume> matchingEnabledResumes = resumeRepository.findAllByMatchingEnabled();
 
-        // 각 이력서와 매칭 점수 계산
-        return matchingEnabledResumes.stream()
-                .map(resume -> {
-                    Double matchingScore = getMatchingScore(
-                        createJobPostText(jobPost),
-                        resume.getResumeText()
-                    );
-                    
-                    return CompanyMatchingResponseDto.builder()
-                            .resumeId(resume.getResumeId())
-                            .applicantName(resume.getUser().getUserName())
-                            .matchingScore(matchingScore)
-                            .resumeText(resume.getResumeText())
-                            .build();
-                })
-                .sorted((a, b) -> Double.compare(b.getMatchingScore(), a.getMatchingScore()))
-                .collect(Collectors.toList());
+            // 각 이력서와 매칭 점수 계산
+            List<CompletableFuture<CompanyMatchingResponseDto>> futures = matchingEnabledResumes.stream()
+                    .map(resume -> CompletableFuture.supplyAsync(() -> {
+                        Double matchingScore = getMatchingScore(
+                            createJobPostText(jobPost),
+                            resume.getResumeText()
+                        );
+                        
+                        return CompanyMatchingResponseDto.builder()
+                                .resumeId(resume.getResumeId())
+                                .applicantName(resume.getUser().getUserName())
+                                .matchingScore(matchingScore)
+                                .resumeText(resume.getResumeText())
+                                .build();
+                    }))
+                    .collect(Collectors.toList());
+
+            // 모든 비동기 작업 완료 대기
+            return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                    .thenApply(v -> futures.stream()
+                            .map(CompletableFuture::join)
+                            .sorted((a, b) -> Double.compare(b.getMatchingScore(), a.getMatchingScore()))
+                            .collect(Collectors.toList()))
+                    .join();
+        });
     }
 
     private String createJobPostText(JobPost jobPost) {
@@ -78,47 +91,62 @@ public class CompanyMatchingServiceImpl implements CompanyMatchingService {
         );
     }
 
+    private Double getMatchingScore(String jobPostText, String resumeText) {
+        // 초기 요청을 보내고 task_id를 받음
+        String taskId = webClient.post()
+                .uri("/compare")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(createFastApiRequest(jobPostText, resumeText))
+                .retrieve()
+                .bodyToMono(String.class)
+                .map(response -> {
+                    try {
+                        JsonNode root = objectMapper.readTree(response);
+                        return root.get("task_id").asText();
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to parse task_id from response: " + response);
+                    }
+                })
+                .block();
+
+        // task_id로 결과를 폴링
+        return webClient.get()
+                .uri("/compare/status/" + taskId)
+                .retrieve()
+                .bodyToMono(String.class)
+                .map(response -> {
+                    try {
+                        JsonNode root = objectMapper.readTree(response);
+                        if (root.has("status") && "completed".equals(root.get("status").asText())) {
+                            JsonNode result = root.get("result");
+                            if (result.isArray() && result.size() > 0) {
+                                JsonNode firstItem = result.get(0);
+                                if (firstItem.has("similarity")) {
+                                    String similarityStr = firstItem.get("similarity").asText();
+                                    return Double.parseDouble(similarityStr.replace("점", ""));
+                                }
+                            }
+                        }
+                        throw new RuntimeException("Task not completed or invalid response format");
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to parse matching result: " + response);
+                    }
+                })
+                .retryWhen(Retry.fixedDelay(30, Duration.ofSeconds(2))  // 2초 간격으로 30번 재시도
+                        .filter(ex -> ex instanceof RuntimeException)
+                        .filter(ex -> ex.getMessage().contains("Task not completed")))
+                .block();
+    }
+
     private Object createFastApiRequest(String jobPostText, String resumeText) {
         return new Object() {
             public final String input_text = jobPostText;
             public final List<Object> dataset = List.of(
                 new Object() {
-                    public final Long resume_id = 1L; // 임시 ID
+                    public final Long resume_id = 1L;
                     public final String resume_description = resumeText;
                 }
             );
         };
-    }
-
-    private Double getMatchingScore(String jobPostText, String resumeText) {
-        return webClient.post()
-                .uri(fastApiUrl + "/compare")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(createFastApiRequest(jobPostText, resumeText))
-                .retrieve()
-                .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(), response -> {
-                    return response.bodyToMono(String.class)
-                            .flatMap(errorBody -> Mono.error(new RuntimeException(
-                                    "FastAPI 서버 에러: " + errorBody)));
-                })
-                .bodyToMono(String.class)
-                .map(response -> {
-                    try {
-                        ObjectMapper mapper = new ObjectMapper();
-                        JsonNode root = mapper.readTree(response);
-                        if (root.isArray() && root.size() > 0) {
-                            JsonNode firstItem = root.get(0);
-                            if (firstItem.has("similarity")) {
-                                String similarityStr = firstItem.get("similarity").asText();
-                                // "점" 문자 제거하고 숫자로 변환
-                                return Double.parseDouble(similarityStr.replace("점", ""));
-                            }
-                        }
-                        throw new RuntimeException("Invalid response format: " + response);
-                    } catch (Exception e) {
-                        throw new RuntimeException("Failed to parse FastAPI response: " + e.getMessage());
-                    }
-                })
-                .block();
     }
 } 
