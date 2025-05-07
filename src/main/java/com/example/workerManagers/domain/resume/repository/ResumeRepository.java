@@ -12,6 +12,6 @@ public interface ResumeRepository extends JpaRepository<Resume, Long> {
     Optional<Resume> findByUser(User user);
     boolean existsByUser(User user);
     
-    @Query("SELECT r FROM Resume r WHERE r.user.matchingEnabled = true")
+    @Query("SELECT r FROM Resume r LEFT JOIN FETCH r.user WHERE r.user.matchingEnabled = true")
     List<Resume> findAllByMatchingEnabled();
 } 

@@ -36,82 +36,75 @@ public class AIMatchingServiceImpl implements AIMatchingService {
 
     @Override
     @Transactional
-    public CompletableFuture<List<JobPostMatchingDto>> getMatchingScoresForAllJobPosts(String resumeText) {
+    public CompletableFuture<List<JobPostMatchingDto>> getMatchingScoresForAllJobPosts(String resumeText, Long resumeId) {
         List<JobPost> jobPosts = jobPostRepository.findAll();
-        
-        List<CompletableFuture<JobPostMatchingDto>> futures = jobPosts.stream()
-                .map(jobPost -> CompletableFuture.supplyAsync(() -> {
-                    Double matchingScore = getMatchingScore(
-                        createJobPostText(jobPost),
-                        resumeText
-                    );
-                    return JobPostMatchingDto.builder()
-                            .jobPostId(jobPost.getJobPostId())
-                            .companyName(jobPost.getCompany().getCompanyName())
-                            .jobName(jobPost.getJobCode().getJobName())
-                            .jobPostDescription(jobPost.getJobPostDescription())
-                            .matchingScore(matchingScore)
-                            .build();
-                }))
-                .collect(Collectors.toList());
-
-        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                .thenApply(v -> futures.stream()
-                        .map(CompletableFuture::join)
-                        .sorted((a, b) -> b.getMatchingScore().compareTo(a.getMatchingScore()))
-                        .collect(Collectors.toList()));
+        List<JobPostMatchingDto> results = new java.util.ArrayList<>();
+        for (JobPost jobPost : jobPosts) {
+            Double matchingScore = getMatchingScore(
+                createJobPostText(jobPost),
+                resumeText,
+                resumeId
+            );
+            results.add(JobPostMatchingDto.builder()
+                .jobPostId(jobPost.getJobPostId())
+                .companyName(jobPost.getCompany().getCompanyName())
+                .jobName(jobPost.getJobCode().getJobName())
+                .jobPostDescription(jobPost.getJobPostDescription())
+                .matchingScore(matchingScore)
+                .build());
+            try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+        }
+        return java.util.concurrent.CompletableFuture.completedFuture(
+            results.stream()
+                .sorted((a, b) -> b.getMatchingScore().compareTo(a.getMatchingScore()))
+                .collect(java.util.stream.Collectors.toList())
+        );
     }
 
     @Override
     @Transactional
     public CompletableFuture<List<AIMatchingResponseDto>> getMatchingScores(AIMatchingRequestDto requestDto) {
         try {
-            // 이력서와 채용공고 정보를 트랜잭션 내에서 미리 로드
             Resume resume = resumeRepository.findById(requestDto.getResumeId())
                     .orElseThrow(() -> new IllegalArgumentException("Resume not found with ID: " + requestDto.getResumeId()));
-            
-            List<JobPost> jobPosts;
+            java.util.List<JobPost> jobPosts;
             if (requestDto.getJobPostId() != null) {
-                // 단일 채용공고에 대한 매칭
                 JobPost jobPost = jobPostRepository.findById(requestDto.getJobPostId())
                         .orElseThrow(() -> new IllegalArgumentException("Job post not found with ID: " + requestDto.getJobPostId()));
-                jobPosts = Collections.singletonList(jobPost);
+                jobPosts = java.util.Collections.singletonList(jobPost);
             } else {
-                // 모든 채용공고에 대한 매칭
                 jobPosts = jobPostRepository.findAll();
             }
-            
-            // 필요한 데이터를 미리 추출
             String resumeText = resume.getResumeText();
-            List<JobPostData> jobPostDataList = jobPosts.stream()
+            java.util.List<JobPostData> jobPostDataList = jobPosts.stream()
                     .map(jobPost -> new JobPostData(
                         jobPost.getJobPostId(),
                         jobPost.getCompany().getCompanyName(),
                         jobPost.getJobCode().getJobName(),
                         createJobPostText(jobPost)))
-                    .collect(Collectors.toList());
-
-            // 트랜잭션 외부에서 비동기 처리
-            return CompletableFuture.supplyAsync(() -> 
-                jobPostDataList.stream()
-                    .map(jobPostData -> {
-                        Double matchingScore = getMatchingScore(
-                            jobPostData.jobPostText,
-                            resumeText
-                        );
-                        
-                        return AIMatchingResponseDto.builder()
-                                .jobPostId(jobPostData.jobPostId)
-                                .companyName(jobPostData.companyName)
-                                .jobName(jobPostData.jobName)
-                                .matchingScore(matchingScore)
-                                .build();
-                    })
+                    .collect(java.util.stream.Collectors.toList());
+            java.util.List<AIMatchingResponseDto> results = new java.util.ArrayList<>();
+            for (JobPostData jobPostData : jobPostDataList) {
+                Double matchingScore = getMatchingScore(
+                    jobPostData.jobPostText,
+                    resumeText,
+                    jobPostData.jobPostId
+                );
+                results.add(AIMatchingResponseDto.builder()
+                    .jobPostId(jobPostData.jobPostId)
+                    .companyName(jobPostData.companyName)
+                    .jobName(jobPostData.jobName)
+                    .matchingScore(matchingScore)
+                    .build());
+                try { Thread.sleep(1000); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
+            }
+            return java.util.concurrent.CompletableFuture.completedFuture(
+                results.stream()
                     .sorted((a, b) -> Double.compare(b.getMatchingScore(), a.getMatchingScore()))
-                    .collect(Collectors.toList())
+                    .collect(java.util.stream.Collectors.toList())
             );
         } catch (Exception e) {
-            return CompletableFuture.failedFuture(e);
+            return java.util.concurrent.CompletableFuture.failedFuture(e);
         }
     }
 
@@ -140,11 +133,11 @@ public class AIMatchingServiceImpl implements AIMatchingService {
         );
     }
 
-    private Double getMatchingScore(String jobPostText, String resumeText) {
+    private Double getMatchingScore(String jobPostText, String resumeText, Long resumeId) {
         return webClient.post()
                 .uri("/compare")
                 .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(createFastApiRequest(jobPostText, resumeText))
+                .bodyValue(createFastApiRequest(jobPostText, resumeText, resumeId))
                 .retrieve()
                 .onStatus(status -> status.is4xxClientError() || status.is5xxServerError(),
                         response -> response.bodyToMono(String.class)
@@ -220,13 +213,13 @@ public class AIMatchingServiceImpl implements AIMatchingService {
         }
     }
 
-    private Object createFastApiRequest(String jobPostText, String resumeText) {
+    private Object createFastApiRequest(String jobPostText, String resumeText, Long resumeId) {
         return new Object() {
-            public final String input_text = jobPostText;
+            public final String input_text = resumeText;  // 이력서 내용을 input_text로
             public final List<Object> dataset = List.of(
                 new Object() {
-                    public final Long resume_id = 1L;
-                    public final String resume_description = resumeText;
+                    public final String jobPost_id = "1";  // 채용공고 ID
+                    public final String jobPost_description = jobPostText;  // 채용공고 내용
                 }
             );
         };

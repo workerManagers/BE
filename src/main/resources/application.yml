@@ -9,22 +9,16 @@ spring:
     async:
       request-timeout: 600000  # 10분
 
-fastapi:
-  server:
-    url: https://port-0-workermanagers-ai-m9i2iiuc1e546d59.sel4.cloudtype.app  # FastAPI 서버 주소
-
 server:
   connection-timeout: 600000  # 10분
   servlet:
     session:
       timeout: 30m   # 세션 타임아웃 (30분)
   tomcat:
-    connection-timeout: 600000  # 10분
     max-http-form-post-size: 20MB
     max-swallow-size: 20MB
     max-connections: 8192
     accept-count: 100
     max-threads: 200
     min-spare-threads: 10
-    keepalive-timeout: 600000  # 10분
   forward-headers-strategy: native

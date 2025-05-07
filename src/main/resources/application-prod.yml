@@ -1,4 +1,4 @@
-# ================ 애플리케이션 기본 설정 ================
+# ================ 데이터베이스 설정 ================
 spring:
   datasource:
     url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf8&serverTimezone=UTC
@@ -19,6 +19,7 @@ jwt:
   secret: ${JWT_SECRET}
   access-token-validity-in-seconds: ${JWT_ACCESS_TOKEN_VALIDITY_IN_SECONDS}
   refresh-token-validity-in-seconds: ${JWT_REFRESH_TOKEN_VALIDITY_IN_SECONDS}
+
 # ================ 로깅 설정 ================
 logging:
   level:

@@ -7,6 +7,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 public interface AIMatchingService {
-    CompletableFuture<List<JobPostMatchingDto>> getMatchingScoresForAllJobPosts(String resumeText);
+    CompletableFuture<List<JobPostMatchingDto>> getMatchingScoresForAllJobPosts(String resumeText, Long resumeId);
     CompletableFuture<List<AIMatchingResponseDto>> getMatchingScores(AIMatchingRequestDto requestDto);
 } 
