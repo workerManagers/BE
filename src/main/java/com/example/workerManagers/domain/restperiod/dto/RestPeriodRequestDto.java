@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Pattern;
 
 @Getter
 @Builder
+@NoArgsConstructor  // 기본 생성자 추가
+@AllArgsConstructor // 모든 필드를 파라미터로 받는 생성자 추가
 public class RestPeriodRequestDto {
     @NotNull(message = "질병명은 필수입니다.")
     private String disease;
