@@ -46,6 +46,11 @@ public class SecurityConfig {
                     "/job-posts/**", "/companies/**", "/job-codes/**", "/industrial-accidents/**", "/predict/**", "/ai-matchings/**", "/resumes/**", "/applications/**",
                     "/bookmarks/**", "/talentbookmarks/**", "/ws-chat/**", "/auth/refresh", "/auth/extend", "/company-matchings/**").permitAll()
                 .requestMatchers("/chat/**").authenticated()
+                .requestMatchers("/api/v1/auth/**").permitAll()
+                .requestMatchers("/api/v1/users/register").permitAll()
+                .requestMatchers("/api/v1/users/login").permitAll()
+                .requestMatchers("/api/v1/users/{userId}").permitAll()
+                .requestMatchers("/api/v1/applications/{applicationId}/hired-status").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(tokenProvider, tokenBlacklist), UsernamePasswordAuthenticationFilter.class)

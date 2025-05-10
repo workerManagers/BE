@@ -3,6 +3,7 @@ package com.example.workerManagers.domain.application.service;
 import com.example.workerManagers.domain.application.dto.ApplicationRequestDto;
 import com.example.workerManagers.domain.application.dto.ApplicationResponseDto;
 import com.example.workerManagers.domain.application.dto.ApplicationStatusUpdateDto;
+import com.example.workerManagers.domain.application.dto.ApplicationHiredStatusDto;
 import com.example.workerManagers.domain.application.entity.Application;
 import com.example.workerManagers.domain.application.repository.ApplicationRepository;
 import com.example.workerManagers.domain.jobpost.entity.JobPost;
@@ -129,5 +130,20 @@ public class ApplicationServiceImpl implements ApplicationService {
         }
 
         applicationRepository.delete(application);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ApplicationHiredStatusDto getApplicationHiredStatus(Long applicationId, String userEmail) {
+        Application application = applicationRepository.findById(applicationId)
+                .orElseThrow(() -> new ResumeException("지원서를 찾을 수 없습니다."));
+
+        // 지원자 본인이나 해당 공고의 회사만 조회 가능
+        if (!application.getUser().getUserEmail().equals(userEmail) && 
+            !application.getJobPost().getCompany().getUser().getUserEmail().equals(userEmail)) {
+            throw new ResumeException("권한이 없습니다.");
+        }
+
+        return ApplicationHiredStatusDto.from(ApplicationResponseDto.from(application));
     }
 } 

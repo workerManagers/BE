@@ -3,6 +3,7 @@ package com.example.workerManagers.domain.jobpost.entity;
 import com.example.workerManagers.domain.application.entity.Application;
 import com.example.workerManagers.domain.company.entity.Company;
 import com.example.workerManagers.domain.jobcode.entity.JobCode;
+import com.example.workerManagers.domain.users.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -62,6 +63,17 @@ public class JobPost {
     @OneToMany(mappedBy = "jobPost", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Application> applications = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "recruitment_status", nullable = false)
+    private RecruitmentStatus recruitmentStatus;
+
+    @PrePersist
+    protected void onCreate() {
+        if (this.recruitmentStatus == null) {
+            this.recruitmentStatus = RecruitmentStatus.OPEN;
+        }
+    }
+
     @Builder
     public JobPost(String jobName, Company company, JobCode jobCode, String jobPostDescription, String jobPeriod,
                   LocalDateTime deadline, CareerType careerType, String mainTasks, String qualifications,
@@ -78,6 +90,7 @@ public class JobPost {
         this.preferredQualifications = preferredQualifications;
         this.idealCandidate = idealCandidate;
         this.jobRegion = jobRegion;
+        this.recruitmentStatus = RecruitmentStatus.OPEN;
     }
 
     public void update(Company company, JobCode jobCode, String jobPostDescription, String jobPeriod,
@@ -94,5 +107,9 @@ public class JobPost {
         this.preferredQualifications = preferredQualifications;
         this.idealCandidate = idealCandidate;
         this.jobRegion = jobRegion;
+    }
+
+    public void updateRecruitmentStatus(RecruitmentStatus status) {
+        this.recruitmentStatus = status;
     }
 }

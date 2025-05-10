@@ -3,10 +3,13 @@ package com.example.workerManagers.domain.application.controller;
 import com.example.workerManagers.domain.application.dto.ApplicationRequestDto;
 import com.example.workerManagers.domain.application.dto.ApplicationResponseDto;
 import com.example.workerManagers.domain.application.dto.ApplicationStatusUpdateDto;
+import com.example.workerManagers.domain.application.dto.ApplicationHiredStatusDto;
 import com.example.workerManagers.domain.application.service.ApplicationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -56,5 +59,12 @@ public class ApplicationController {
         String userEmail = authentication.getName();
         applicationService.deleteApplication(applicationId, userEmail);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/{applicationId}/hired-status")
+    public ResponseEntity<ApplicationHiredStatusDto> getApplicationHiredStatus(
+            @PathVariable Long applicationId,
+            @AuthenticationPrincipal String userEmail) {
+        return ResponseEntity.ok(applicationService.getApplicationHiredStatus(applicationId, userEmail));
     }
 } 

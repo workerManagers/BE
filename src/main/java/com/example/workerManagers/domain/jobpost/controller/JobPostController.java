@@ -2,12 +2,14 @@ package com.example.workerManagers.domain.jobpost.controller;
 
 import com.example.workerManagers.domain.jobpost.dto.JobPostRequestDto;
 import com.example.workerManagers.domain.jobpost.dto.JobPostResponseDto;
+import com.example.workerManagers.domain.jobpost.dto.RecruitmentStatusUpdateDto;
 import com.example.workerManagers.domain.jobpost.service.JobPostService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -33,14 +35,19 @@ public class JobPostController {
     @PutMapping("/{jobPostId}")
     public ResponseEntity<JobPostResponseDto> updateJobPost(
             @PathVariable Long jobPostId,
-            @Valid @RequestBody JobPostRequestDto requestDto) {
-        JobPostResponseDto responseDto = jobPostService.updateJobPost(jobPostId, requestDto);
+            @Valid @RequestBody JobPostRequestDto requestDto,
+            Authentication authentication) {
+        String userEmail = authentication.getName();
+        JobPostResponseDto responseDto = jobPostService.updateJobPost(jobPostId, requestDto, userEmail);
         return ResponseEntity.ok(responseDto);
     }
 
     @DeleteMapping("/{jobPostId}")
-    public ResponseEntity<Void> deleteJobPost(@PathVariable Long jobPostId) {
-        jobPostService.deleteJobPost(jobPostId);
+    public ResponseEntity<Void> deleteJobPost(
+            @PathVariable Long jobPostId,
+            Authentication authentication) {
+        String userEmail = authentication.getName();
+        jobPostService.deleteJobPost(jobPostId, userEmail);
         return ResponseEntity.noContent().build();
     }
 
@@ -48,5 +55,20 @@ public class JobPostController {
     public ResponseEntity<List<JobPostResponseDto>> getAllJobPosts() {
         List<JobPostResponseDto> jobPosts = jobPostService.getAllJobPosts();
         return ResponseEntity.ok(jobPosts);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<JobPostResponseDto>> getJobPostsByUserId(@PathVariable Long userId) {
+        List<JobPostResponseDto> jobPosts = jobPostService.getJobPostsByUserId(userId);
+        return ResponseEntity.ok(jobPosts);
+    }
+
+    @PutMapping("/{jobPostId}/recruitment-status")
+    public ResponseEntity<JobPostResponseDto> updateRecruitmentStatus(
+            @PathVariable Long jobPostId,
+            @RequestBody RecruitmentStatusUpdateDto requestDto,
+            Authentication authentication) {
+        String userEmail = authentication.getName();
+        return ResponseEntity.ok(jobPostService.updateRecruitmentStatus(jobPostId, requestDto, userEmail));
     }
 } 

@@ -6,6 +6,7 @@ import com.example.workerManagers.domain.jobcode.entity.JobCode;
 import com.example.workerManagers.domain.jobcode.repository.JobCodeRepository;
 import com.example.workerManagers.domain.jobpost.dto.JobPostRequestDto;
 import com.example.workerManagers.domain.jobpost.dto.JobPostResponseDto;
+import com.example.workerManagers.domain.jobpost.dto.RecruitmentStatusUpdateDto;
 import com.example.workerManagers.domain.jobpost.entity.JobPost;
 import com.example.workerManagers.domain.jobpost.exception.JobPostException;
 import com.example.workerManagers.domain.jobpost.repository.JobPostRepository;
@@ -65,9 +66,14 @@ public class JobPostServiceImpl implements JobPostService {
 
     @Override
     @Transactional
-    public JobPostResponseDto updateJobPost(Long jobPostId, JobPostRequestDto requestDto) {
+    public JobPostResponseDto updateJobPost(Long jobPostId, JobPostRequestDto requestDto, String userEmail) {
         JobPost jobPost = jobPostRepository.findById(jobPostId)
                 .orElseThrow(() -> new JobPostException("채용 공고를 찾을 수 없습니다: " + jobPostId));
+
+        // 회사 사용자만 수정 가능
+        if (!jobPost.getCompany().getUser().getUserEmail().equals(userEmail)) {
+            throw new JobPostException("권한이 없습니다.");
+        }
 
         Company company = companyRepository.findByCompanyName(requestDto.getCompanyName())
                 .orElseThrow(() -> new CompanyException("회사를 찾을 수 없습니다: " + requestDto.getCompanyName()));
@@ -86,9 +92,15 @@ public class JobPostServiceImpl implements JobPostService {
 
     @Override
     @Transactional
-    public void deleteJobPost(Long jobPostId) {
+    public void deleteJobPost(Long jobPostId, String userEmail) {
         JobPost jobPost = jobPostRepository.findById(jobPostId)
-                .orElseThrow(() -> new RuntimeException("모집공고를 찾을 수 없습니다."));
+                .orElseThrow(() -> new JobPostException("모집공고를 찾을 수 없습니다."));
+
+        // 회사 사용자만 삭제 가능
+        if (!jobPost.getCompany().getUser().getUserEmail().equals(userEmail)) {
+            throw new JobPostException("권한이 없습니다.");
+        }
+
         jobPostRepository.delete(jobPost);
     }
 
@@ -97,6 +109,14 @@ public class JobPostServiceImpl implements JobPostService {
         List<JobPost> jobPosts = jobPostRepository.findAll();
         return jobPosts.stream()
                 .map(jobPost -> JobPostResponseDto.of(jobPost, "모든 모집공고 조회가 완료되었습니다."))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<JobPostResponseDto> getJobPostsByUserId(Long userId) {
+        List<JobPost> jobPosts = jobPostRepository.findByUserId(userId);
+        return jobPosts.stream()
+                .map(jobPost -> JobPostResponseDto.of(jobPost, "유저의 모집공고 조회가 완료되었습니다."))
                 .collect(Collectors.toList());
     }
 
@@ -126,5 +146,20 @@ public class JobPostServiceImpl implements JobPostService {
         description.append("근무 지역: ").append(jobPost.getJobRegion()).append(".");
         
         return description.toString();
+    }
+
+    @Override
+    @Transactional
+    public JobPostResponseDto updateRecruitmentStatus(Long jobPostId, RecruitmentStatusUpdateDto requestDto, String userEmail) {
+        JobPost jobPost = jobPostRepository.findById(jobPostId)
+                .orElseThrow(() -> new JobPostException("채용 공고를 찾을 수 없습니다."));
+
+        // 회사 사용자만 상태 변경 가능
+        if (!jobPost.getCompany().getUser().getUserEmail().equals(userEmail)) {
+            throw new JobPostException("권한이 없습니다.");
+        }
+
+        jobPost.updateRecruitmentStatus(requestDto.getStatus());
+        return JobPostResponseDto.from(jobPost);
     }
 } 

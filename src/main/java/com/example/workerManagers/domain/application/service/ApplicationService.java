@@ -3,6 +3,7 @@ package com.example.workerManagers.domain.application.service;
 import com.example.workerManagers.domain.application.dto.ApplicationRequestDto;
 import com.example.workerManagers.domain.application.dto.ApplicationResponseDto;
 import com.example.workerManagers.domain.application.dto.ApplicationStatusUpdateDto;
+import com.example.workerManagers.domain.application.dto.ApplicationHiredStatusDto;
 
 import java.util.List;
 
@@ -14,4 +15,5 @@ public interface ApplicationService {
     List<ApplicationResponseDto> getMyApplications(String userEmail);
     ApplicationResponseDto updateApplicationStatus(Long applicationId, ApplicationStatusUpdateDto requestDto, String userEmail);
     void deleteApplication(Long applicationId, String userEmail);
+    ApplicationHiredStatusDto getApplicationHiredStatus(Long applicationId, String userEmail);
 } 
